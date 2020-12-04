@@ -38,19 +38,19 @@ public class TeamsAdapter extends ArrayAdapter<Team> {
         }
         Team o = teams.get(position);
         if (o != null) {
-            TextView pos = (TextView) v.findViewById(R.id.position);
-            TextView name = (TextView) v.findViewById(R.id.name);
-            TextView wins = (TextView) v.findViewById(R.id.wins);
-            TextView draws = (TextView) v.findViewById(R.id.draws);
-            TextView losses = (TextView) v.findViewById(R.id.losses);
-            TextView points = (TextView) v.findViewById(R.id.points);
+            TextView pos = (TextView) v.findViewById(R.id.n_subject);
+            TextView name = (TextView) v.findViewById(R.id.name_subject);
+            TextView wins = (TextView) v.findViewById(R.id.duration);
+            TextView draws = (TextView) v.findViewById(R.id.audit_numb);
+            //TextView losses = (TextView) v.findViewById(R.id.losses);
+            //TextView points = (TextView) v.findViewById(R.id.points);
 
-            pos.setText(String.valueOf(o.getAudit()));
-            name.setText(String.valueOf(o.getDuration()));
-            wins.setText(String.valueOf(o.getGroup_name()));
-            draws.setText(String.valueOf(o.getWeek_day()));
-            losses.setText(String.valueOf(o.getSubject_name()));
-            points.setText(String.valueOf(o.getN_group()));
+            pos.setText(String.valueOf(o.getN_subject()));
+            name.setText(String.valueOf(o.getSubject_name()));
+            wins.setText(String.valueOf(o.getDuration()));
+            draws.setText(String.valueOf(o.getAudit()));
+            //losses.setText(String.valueOf(o.getSubject_name()));
+            //points.setText(String.valueOf(o.getN_group()));
         }
         return v;
     }

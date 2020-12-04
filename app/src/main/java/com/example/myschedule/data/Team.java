@@ -8,7 +8,21 @@ public class Team implements Parcelable
     private int n_subject,n_group;
     private String week_day,duration,audit,subject_name,group_name;
 
-
+    public Team(int n_subject, String duration, String audit, String subject_name) {
+        this.n_subject = n_subject;
+        this.duration = duration;
+        this.audit = audit;
+        this.subject_name = subject_name;
+    }
+    public Team(int n_subject, String duration,String audit,String subject_name,int n_group, String week_day,    String group_name) {
+        this.n_subject = n_subject;
+        this.n_group = n_group;
+        this.week_day = week_day;
+        this.duration = duration;
+        this.audit = audit;
+        this.subject_name = subject_name;
+        this.group_name = group_name;
+    }
     public Team(int n_subject, int n_group, String week_day, String duration, String audit, String subject_name, String group_name) {
         this.n_subject = n_subject;
         this.n_group = n_group;

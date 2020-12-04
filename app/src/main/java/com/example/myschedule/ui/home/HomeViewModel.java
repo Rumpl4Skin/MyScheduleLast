@@ -30,7 +30,7 @@ public class HomeViewModel extends ViewModel {
     // Get vehicle list of data return type MutableLiveData
     MutableLiveData<List<Team>> getTeamData() {
         TeamData = new MutableLiveData<List<Team>>();
-        if (teamsList.size()==0){
+        if (true/*teamsList.size()==0*/){
             new DownloadWebpageTask(new AsyncResult() {
                 @Override
                 public void onResult(JSONObject object) {
@@ -57,7 +57,7 @@ public class HomeViewModel extends ViewModel {
         try {
             JSONArray rows = object.getJSONArray("rows");
 
-            for (int r = 0; r < rows.length(); ++r) {
+           /* for (int r = 0; r < rows.length(); ++r) {
                 JSONObject row = rows.getJSONObject(r);
                 JSONArray columns = row.getJSONArray("c");
 
@@ -68,13 +68,39 @@ public class HomeViewModel extends ViewModel {
                 String audit = columns.getJSONObject(4).getString("v");
                 String subject_name = columns.getJSONObject(5).getString("v");
                 String group_name = columns.getJSONObject(19).getString("v");
-
                 Team team = new Team(n_subject, n_group, week_day, duration, audit, subject_name, group_name);
+
                 if(!teamsList.contains(team))
                 teamsList.add(team);
-            }
+            }*/
 
-
+            Team team1 = new Team(1, "8.00-8.45","37","Физика",0,"","");
+            Team team2 = new Team(2, "8.55-9.40","37","Физика",0,"","");
+            Team team3 = new Team(3, "9.50-10.35","37","Специальная технология",0,"","");
+            Team team4 = new Team(4, "10.45-11.30","31","Обед (1)/ Прикладная информатика (2)",0,"","");
+            Team team5 = new Team(5, "11.40-12.25","31","Прикладная информатика (1)/ Обед (2)",0,"","");
+            Team team6 = new Team(6, "12.35-13.20","25","Биология",0,"","");
+            Team team7 = new Team(7, "13.30-14.15","--","Физическая культура и здоровье (ф)",0,"","");
+            Team team8 = new Team(8, "14.25-15.10","32","Физика",0,"","");
+            Team team9 = new Team(9, "15.20-16.05","32","География",0,"","");
+            //if(!teamsList.contains(team1))
+            teamsList.add(team1);
+            if(!teamsList.contains(team2))
+                teamsList.add(team2);
+            if(!teamsList.contains(team3))
+                teamsList.add(team3);
+            if(!teamsList.contains(team4))
+                teamsList.add(team4);
+            if(!teamsList.contains(team5))
+                teamsList.add(team5);
+            if(!teamsList.contains(team6))
+                teamsList.add(team6);
+            if(!teamsList.contains(team7))
+                teamsList.add(team7);
+            if(!teamsList.contains(team8))
+                teamsList.add(team8);
+            if(!teamsList.contains(team9))
+                teamsList.add(team9);
         } catch (JSONException e) {
             e.printStackTrace();
         }
