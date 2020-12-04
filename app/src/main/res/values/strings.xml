@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">MySchedule</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Иванов Иван</string>
+    <string name="nav_header_subtitle">ivanovivan@gmail.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Расписание</string>
+    <string name="menu_gallery">Администрация</string>
+    <string name="menu_slideshow">Образцы заявлений</string>
+    <string name="menu_disc">Дисциплины</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Вход</string>
+    <string name="action_sign_in_short">Войти</string>
+    <string name="welcome">"Успешно!"</string>
+    <string name="invalid_username">Не правильный логин</string>
+    <string name="invalid_password">Пароль должен быть длиннее 8ми символов</string>
+    <string name="login_failed">"Вход неудался"</string>
+</resources>
