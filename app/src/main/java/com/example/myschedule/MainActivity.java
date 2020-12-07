@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
         Bundle arguments = getIntent().getExtras();
         if(arguments!=null){
+            String  s =arguments.get("user").toString();
             user=new LoggedInUser(mDBHelper.getUser( arguments.get("user").toString()));
             TextView user_fio=findViewById(R.id.user_fio);
             user_fio.setText(user.getFIO());

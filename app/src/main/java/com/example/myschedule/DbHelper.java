@@ -191,6 +191,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 MAIL+"= ? ",
                 new String[] {mail},
                 null, null, null);
+        cursor.moveToFirst();
         LoggedInUser user=new LoggedInUser(cursor.getString(0),
                 cursor.getString(1),
                 cursor.getInt(2),

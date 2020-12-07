@@ -40,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
     //Переменная для работы с БД
     private DbHelper mDBHelper;
     private SQLiteDatabase mDb;
+    public EditText usernameEditText;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
             throw mSQLException;
         }
 
-        final EditText usernameEditText = findViewById(R.id.username);
+        usernameEditText = findViewById(R.id.username);
         final EditText passwordEditText = findViewById(R.id.password);
         final EditText groupEditText = findViewById(R.id.group);
         final Button loginButton = findViewById(R.id.login);
@@ -183,6 +184,8 @@ public class LoginActivity extends AppCompatActivity {
     private void updateUiWithUser(LoggedInUserView model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.putExtra("user", usernameEditText.getText().toString());
+        mDBHelper.close();
         startActivity(intent);
 
     }
