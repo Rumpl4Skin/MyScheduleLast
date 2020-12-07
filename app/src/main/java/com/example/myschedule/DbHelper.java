@@ -200,7 +200,7 @@ public class DbHelper extends SQLiteOpenHelper {
         cursor.close();
         return user;
     }
-    public ArrayList getAllUser() {
+    /*public ArrayList getAllUser() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.query(TABLE_USERS,new String[] {USER_FIO,MAIL,ID_GROUP,ID_USER}, null,
                 null,
@@ -216,7 +216,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 cursor.getInt(3));
         cursor.close();
         return users[];
-    }
+    }*/
   /*  // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
