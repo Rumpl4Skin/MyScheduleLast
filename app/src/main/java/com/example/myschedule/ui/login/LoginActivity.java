@@ -29,8 +29,6 @@ import com.example.myschedule.DbHelper;
 import com.example.myschedule.MainActivity;
 import com.example.myschedule.R;
 import com.example.myschedule.data.model.LoggedInUser;
-import com.example.myschedule.ui.login.LoginViewModel;
-import com.example.myschedule.ui.login.LoginViewModelFactory;
 
 import java.io.IOException;
 
@@ -62,9 +60,9 @@ public class LoginActivity extends AppCompatActivity {
             throw mSQLException;
         }
 
-        usernameEditText = findViewById(R.id.username);
+        usernameEditText = findViewById(R.id.mail);
         final EditText passwordEditText = findViewById(R.id.password);
-        final EditText groupEditText = findViewById(R.id.group);
+        final EditText groupEditText = findViewById(R.id.id_group);
         final Button loginButton = findViewById(R.id.login);
         final Button registrButton = findViewById(R.id.registr);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);

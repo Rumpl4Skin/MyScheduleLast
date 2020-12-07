@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, user.getFIO(), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
 
@@ -86,21 +86,33 @@ public class MainActivity extends AppCompatActivity {
         NavigationView navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
-                .setDrawerLayout(drawer)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
 
         Bundle arguments = getIntent().getExtras();
         if(arguments!=null){
             String  s =arguments.get("user").toString();
             user=new LoggedInUser(mDBHelper.getUser( arguments.get("user").toString()));
-            TextView user_fio=findViewById(R.id.user_fio);
+            View header=navigationView.getHeaderView(0);
+            TextView user_fio=(TextView) header.findViewById(R.id.user_fio);
+            TextView user_mail=(TextView) header.findViewById(R.id.user_mail);
             user_fio.setText(user.getFIO());
+            user_mail.setText(user.getMail());
         }
+        if(user.getMail()=="admen@gmail.com"){
+            mAppBarConfiguration = new AppBarConfiguration.Builder(
+                    R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,R.id.nav_admen)
+                    .setDrawerLayout(drawer)
+                    .build();
+        }
+        else{
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+                .setDrawerLayout(drawer)
+                .build();}
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavigationUI.setupWithNavController(navigationView, navController);
+
+
 
 
     }

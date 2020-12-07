@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 public class DbHelper extends SQLiteOpenHelper {
 
@@ -196,9 +197,26 @@ public class DbHelper extends SQLiteOpenHelper {
                 cursor.getString(1),
                 cursor.getInt(2),
                 cursor.getInt(3));
+        cursor.close();
         return user;
     }
+    public ArrayList getAllUser() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.query(TABLE_USERS,new String[] {USER_FIO,MAIL,ID_GROUP,ID_USER}, null,
+                null,
+                null, null, null);
+        cursor.moveToFirst();
+        //ArrayList<LoggedInUser> users[]=new LoggedInUser[cursor.getCount()];
+        for(int i =0;i<cursor.getCount();i++){
 
+        }
+        LoggedInUser user=new LoggedInUser(cursor.getString(0),
+                cursor.getString(1),
+                cursor.getInt(2),
+                cursor.getInt(3));
+        cursor.close();
+        return users[];
+    }
   /*  // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {

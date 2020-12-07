@@ -11,6 +11,7 @@
     <string name="menu_gallery">Администрация</string>
     <string name="menu_slideshow">Образцы заявлений</string>
     <string name="menu_disc">Дисциплины</string>
+    <string name="menu_admen">Админка</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
