@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DbHelper extends SQLiteOpenHelper {
 
@@ -200,27 +201,24 @@ public class DbHelper extends SQLiteOpenHelper {
         cursor.close();
         return user;
     }
-    public ArrayList getAllUser() {
+    public LoggedInUser[] getAllUser() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,PASSWORD,ID_GROUP,GROUP_NAME}, null,
+        Cursor cursor = db.query(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,PASSWORD,ID_GROUP}, null,
                 null,
                 null, null, null);
         cursor.moveToFirst();
-        ArrayList<LoggedInUser> users=new ArrayList();
+        LoggedInUser[] users=new LoggedInUser[cursor.getCount()];
         for(int i =0;i<cursor.getCount();i++){
-            LoggedInUser user=new LoggedInUser(cursor.getInt(0),
+            LoggedInUser user=new LoggedInUser(
+                    cursor.getInt(0),
                     cursor.getString(1),
                     cursor.getString(2),
                     cursor.getString(3),
-                    cursor.getInt(4),
-                    cursor.getInt(5));
-            users.add(user);
+                    cursor.getInt(4)
+                   );
+            users[i]=new LoggedInUser(user);
             cursor.moveToNext();
         }
-        LoggedInUser user=new LoggedInUser(cursor.getString(0),
-                cursor.getString(1),
-                cursor.getInt(2),
-                cursor.getInt(3));
         cursor.close();
         return users;
     }

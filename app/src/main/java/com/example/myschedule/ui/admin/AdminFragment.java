@@ -18,9 +18,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.myschedule.DbHelper;
 import com.example.myschedule.R;
+import com.example.myschedule.data.model.LoggedInUser;
 import com.example.myschedule.ui.gallery.GalleryViewModel;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AdminFragment extends Fragment {
 
@@ -30,11 +33,12 @@ public class AdminFragment extends Fragment {
 
     EditText edtIdUser,edtFio,edtMail,edtPsw,edtIdGroup,edtGroupName;
     ImageView btnPrev,btnUpdate,btnDel,btnAplly,btnNext;
+    int count=0;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        galleryViewModel =
-                new ViewModelProvider(this).get(AdminViewModel.class);
+        /*galleryViewModel =
+                new ViewModelProvider(this).get(AdminViewModel.class);*/
         View root = inflater.inflate(R.layout.fragment_admin, container, false);
 
         edtIdUser = root.findViewById(R.id.id_user);
@@ -44,11 +48,11 @@ public class AdminFragment extends Fragment {
         edtIdGroup = root.findViewById(R.id.id_group);
         edtGroupName = root.findViewById(R.id.group_name);
 
-        btnPrev = root.findViewById(R.id.group_name);
-        btnUpdate = root.findViewById(R.id.group_name);
-        btnDel = root.findViewById(R.id.group_name);
-        btnAplly = root.findViewById(R.id.group_name);
-        btnNext = root.findViewById(R.id.group_name);
+        btnPrev = root.findViewById(R.id.prev);
+        btnUpdate = root.findViewById(R.id.update);
+        btnAplly = root.findViewById(R.id.apply);
+        btnNext = root.findViewById(R.id.next);
+        btnDel=root.findViewById(R.id.delete);
 
         mDBHelper = new DbHelper(getContext());
 
@@ -63,11 +67,31 @@ public class AdminFragment extends Fragment {
         } catch (SQLException mSQLException) {
             throw mSQLException;
         }
-        /*final TextView textView = root.findViewById(R.id.text_gallery);
-        galleryViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        LoggedInUser[] users=mDBHelper.getAllUser();
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //galleryViewModel.setAllUsers(users);
+
+               edtIdUser.setText(""+users[0].getIdUser());
+                edtFio.setText(users[0].getFIO());
+                edtMail.setText(users[0].getMail());
+                edtPsw .setText(users[0].getPassword());
+                edtIdGroup.setText(""+users[0].getIdGroup());
+                //edtGroupName.setText((int)users.get(0).getGroupName());
+            }
+        });
+
+/*galleryViewModel.getUserId().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+    @Override
+    public void onChanged(Integer integer) {
+        edtIdUser.setText(integer);
+    }
+});*/
+       /* galleryViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
-                textView.setText(s);
+                edtIdUser.setText(s);
             }
         });*/
         return root;

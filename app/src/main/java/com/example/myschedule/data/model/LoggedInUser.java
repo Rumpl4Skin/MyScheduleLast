@@ -22,7 +22,7 @@ public class LoggedInUser {
         this.idUser = user.getIdUser();
     }
 
-    public LoggedInUser(int idUser, String FIO,String groupName, String mail, String password, int idGroup ) {
+    public LoggedInUser(int idUser, String FIO,String mail,String password,int idGroup,String groupName) {
         this.groupName = groupName;
         this.FIO = FIO;
         this.mail = mail;
@@ -30,7 +30,13 @@ public class LoggedInUser {
         this.idGroup = idGroup;
         this.idUser = idUser;
     }
-
+    public LoggedInUser(int idUser,String FIO, String mail, String password, int idGroup ) {
+        this.FIO = FIO;
+        this.mail = mail;
+        this.password = password;
+        this.idGroup = idGroup;
+        this.idUser = idUser;
+    }
     public LoggedInUser(String FIO, String mail, int idGroup, int idUser) {
         this.FIO = FIO;
         this.mail = mail;
