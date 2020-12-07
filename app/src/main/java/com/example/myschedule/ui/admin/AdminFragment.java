@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -90,6 +91,7 @@ public class AdminFragment extends Fragment {
                 edtPsw .setText(users[count].getPassword());
                 edtIdGroup.setText(""+users[count].getIdGroup());
                 //edtGroupName.setText((int)users.get(0).getGroupName());
+                Toast.makeText(getContext(), "Обновлено", Toast.LENGTH_SHORT).show();
             }
         });
         btnPrev.setOnClickListener(new View.OnClickListener() {
@@ -124,11 +126,13 @@ btnDel.setOnClickListener(new View.OnClickListener() {
         mDb.delete("users",
                 "id_user = ?",
                 new String[] {edtIdUser.getText().toString()});
+        Toast.makeText(getContext(), "Запись удалена, обновите админку", Toast.LENGTH_SHORT).show();
     }
 });
 btnAplly.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) {
+
         ContentValues newValues = new ContentValues();
 // Задайте значения для каждой строки.
         newValues.put(ID_USER,  edtIdUser.getText().toString());
@@ -140,6 +144,8 @@ btnAplly.setOnClickListener(new View.OnClickListener() {
 // Вставьте строку в вашу базу данных.
         mDb.insert(TABLE_USERS, null, newValues);
         //users=mDBHelper.getAllUser();
+mDb.close();
+        Toast.makeText(getContext(), "Запись отредактирована!", Toast.LENGTH_SHORT).show();
     }
 });
 /*galleryViewModel.getUserId().observe(getViewLifecycleOwner(), new Observer<Integer>() {
