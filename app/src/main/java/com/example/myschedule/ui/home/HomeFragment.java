@@ -51,6 +51,7 @@ public class HomeFragment extends Fragment {
 
                 //listView.setRecyclerListener();
             }
+
         });
     }
 }

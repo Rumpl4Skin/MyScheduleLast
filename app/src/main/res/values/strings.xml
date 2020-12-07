@@ -14,7 +14,9 @@
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
+    <string name="prompt_group">GROUP NUMBER</string>
     <string name="action_sign_in">Вход</string>
+    <string name="action_registr">Регистрация</string>
     <string name="action_sign_in_short">Войти</string>
     <string name="welcome">"Успешно!"</string>
     <string name="invalid_username">Не правильный логин</string>

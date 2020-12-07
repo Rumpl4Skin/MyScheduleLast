@@ -1,6 +1,8 @@
 package com.example.myschedule;
 
 import android.content.Context;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -8,9 +10,11 @@ import android.view.View;
 import android.view.Menu;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.myschedule.adapters.TeamsAdapter;
 import com.example.myschedule.data.Team;
+import com.example.myschedule.data.model.LoggedInUser;
 import com.example.myschedule.ui.AsyncResult;
 import com.example.myschedule.ui.DownloadWebpageTask;
 import com.example.myschedule.ui.home.HomeFragment;
@@ -35,12 +39,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private static final String DEBUG_TAG = "HttpExample";
+    private DbHelper mDBHelper;
+    private SQLiteDatabase mDb;
+    private LoggedInUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +56,22 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
+
+        mDBHelper = new DbHelper(this);
+
+        try {
+            mDBHelper.updateDataBase();
+        } catch (IOException mIOException) {
+            throw new Error("UnableToUpdateDatabase");
+        }
+
+        try {
+            mDb = mDBHelper.getWritableDatabase();
+        } catch (SQLException mSQLException) {
+            throw mSQLException;
+        }
+
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -69,6 +93,15 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        Bundle arguments = getIntent().getExtras();
+        if(arguments!=null){
+            user=new LoggedInUser(mDBHelper.getUser( arguments.get("user").toString()));
+            TextView user_fio=findViewById(R.id.user_fio);
+            user_fio.setText(user.getFIO());
+        }
+
+
     }
 
     @Override

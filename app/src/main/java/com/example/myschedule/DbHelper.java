@@ -2,234 +2,306 @@ package com.example.myschedule;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.example.myschedule.data.model.LoggedInUser;
 
-import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 public class DbHelper extends SQLiteOpenHelper {
 
-        static private final int DB_VERSION = 1;
-        private static DbHelper mInstance = null;
-        private Context mContext;
+    private static final int DB_VERSION = 1;
+    private static final String DB_NAME = "1.sqlite";
+    private static String DB_PATH = null;
+    private SQLiteDatabase mDataBase;
+    private final Context mContext;
+    private boolean mNeedUpdate = false;
 
-        DbHelper(Context context) {
-            // конструктор суперкласса
-            super(context, "kaDB", null, DB_VERSION);
-            mContext = context;
+    private static final String TABLE_USERS = "users";
+    private static final String ID_USER = "id_user";
+    private static final String USER_FIO = "fio";
+    private static final String MAIL = "mail";
+    private static final String ID_GROUP = "id_group";
+    private static final String PASSWORD = "password";
+
+    private static final String TABLE_GROUPS = "groups";
+    private static final String GROUP_NAME = "group_name";
+
+
+    public DbHelper(Context context) {
+        super(context, DB_NAME, null, DB_VERSION);
+        if (android.os.Build.VERSION.SDK_INT >= 17)
+            DB_PATH = context.getApplicationInfo().dataDir + "/databases/";
+        else
+            DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
+        this.mContext = context;
+
+        copyDataBase();
+
+        this.getReadableDatabase();
+    }
+
+
+    public void updateDataBase() throws IOException {
+        if (mNeedUpdate) {
+            File dbFile = new File(DB_PATH + DB_NAME);
+            if (dbFile.exists())
+                dbFile.delete();
+
+            copyDataBase();
+
+            mNeedUpdate = false;
         }
+    }
 
-        public static DbHelper getInstance(Context ctx) {
+    private boolean checkDataBase() {
+        File dbFile = new File(DB_PATH + DB_NAME);
+        return dbFile.exists();
+    }
 
-            // Use the application context, which will ensure that you
-            // don't accidentally leak an Activity's context.
-            // See this article for more information: http://bit.ly/6LRzfx
-            if (mInstance == null) {
-                mInstance = new DbHelper(ctx.getApplicationContext());
+    private void copyDataBase() {
+        if (!checkDataBase()) {
+            this.getReadableDatabase();
+            this.close();
+            try {
+                copyDBFile();
+            } catch (IOException mIOException) {
+                throw new Error("ErrorCopyingDataBase");
             }
-            return mInstance;
         }
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            {
-                db.execSQL("create table points ("
-                        + "id integer primary key,"
-                        + "id_point integer,"
-                        + "ord integer,"
-                        + "city_id text,"
-                        + "photo text,"
-                        + "images text,"
-                        + "logo text,"
-                        + "lat text,"
-                        + "lng text,"
-                        + "lang text,"
-                        + "sound text,"
-                        + "text text,"
-                        + "name text,"
-                        + "type text,"
-                        + "visible text,"
-                        + "tags text,"
-                        + "is_excursion text,"
-                        + "isFave integer DEFAULT 0,"
-                        + "isWas integer DEFAULT 0,"
-                        + "excursion_order integer DEFAULT 0,"
-                        + "last_edit_time integer DEFAULT 0" + ");");
-                db.execSQL("create table cities ("
-                        + "id_locale integer primary key,"
-                        + "logo text,"
-                        + "logo_cache text DEFAULT 0,"
-                        + "logo_hash int DEFAULT 0,"
-                        + "id text,"
-                        + "lang text,"
-                        + "name text,"
-                        + "visible text,"
-                        + "isSave integer DEFAULT 0,"
-                        + "isFave integer DEFAULT 0,"
-                        + "last_edit_time integer DEFAULT 0" + ");");
-                db.execSQL("create table langs ("
-                        + "id integer primary key,"
-                        + "name text,"
-                        + "key text" + ");");
-                db.execSQL("create table tags ("
-                        + "id integer primary key,"
-                        + "tag_id integer,"
-                        + "tag_label text,"
-                        + "lang text" + ");");
-                db.execSQL("create table savings ("
-                        + "id integer primary key,"
-                        + "point_id integer,"
-                        + "audio_cache text,"
-                        + "images_cache text,"
-                        + "logo_cache text,"
-                        + "audio_hash integer DEFAULT 0,"
-                        + "images_hash integer DEFAULT 0,"
-                        + "logo_hash integer DEFAULT 0" + ");");
-                db.execSQL("create table tag_point_junc ("
-                        + "id integer primary key autoincrement,"
-                        + "tag_id integer,"
-                        + "point_id integer,"
-                        + "FOREIGN KEY(tag_id) REFERENCES tags(tag_id),"
-                        + "FOREIGN KEY(point_id) REFERENCES points(id_point));");
-                db.execSQL("create table excursions ("
-                        + "id integer primary key,"
-                        + "name text,"
-                        + "logo text,"
-                        + "lang text,"
-                        + "author text,"
-                        + "duration text,"
-                        + "description text,"
-                        + "excursion integer,"
-                        + "points text,"
-                        + "last_edit_time integer DEFAULT 0" + ");");
-            }
-            setDefaultContent(db);
-        }
+    }
+
+    private void copyDBFile() throws IOException {
+        InputStream mInput = mContext.getAssets().open(DB_NAME);
+        //InputStream mInput = mContext.getResources().openRawResource(R.raw.info);
+        OutputStream mOutput = new FileOutputStream(DB_PATH + DB_NAME);
+        byte[] mBuffer = new byte[1024];
+        int mLength;
+        while ((mLength = mInput.read(mBuffer)) > 0)
+            mOutput.write(mBuffer, 0, mLength);
+        mOutput.flush();
+        mOutput.close();
+        mInput.close();
+    }
+
+    public boolean openDataBase() throws SQLException {
+        mDataBase = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null, SQLiteDatabase.CREATE_IF_NECESSARY);
+        return mDataBase != null;
+    }
+
+    @Override
+    public synchronized void close() {
+        if (mDataBase != null)
+            mDataBase.close();
+        super.close();
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+
+    }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        if (newVersion > oldVersion)
+            mNeedUpdate = true;
     }
 
-
-    void setDefaultContent(SQLiteDatabase db) {
-            String jsonStr = jsonReader("langs.txt", mContext);
-            ContentValues cv = new ContentValues();
-            try {
-                JSONArray langs = new JSONArray(jsonStr);
-                for (int i = 0; i < langs.length(); i++) {
-                    JSONObject c = langs.getJSONObject(i);
-                    Cursor c0 = db.rawQuery("SELECT id FROM langs where id = " + c.getString("id"), null);
-                    c0.moveToFirst();
-                    cv.put("id", c.getString("id"));
-                    cv.put("key", c.getString("key"));
-                    cv.put("name", c.getString("name"));
-                    db.beginTransaction();
-                    if ((c0.getCount() > 0)) {
-                        db.update("langs", cv, "id = ?", new String[]{c.getString("id")});
-                    } else {
-                        db.insert("langs ", null, cv);
-                    }
-                    c0.close();
-                    db.setTransactionSuccessful();
-                    db.endTransaction();
-                }
-            } catch (final JSONException e) {
-                e.printStackTrace();
-            }
-
-            jsonStr = jsonReader("city_sources.txt", mContext);
-
-            cv = new ContentValues();
-            try {
-                JSONArray cities = new JSONArray(jsonStr);
-                for (int i = 0; i < cities.length(); i++) {
-                    JSONObject c = cities.getJSONObject(i);
-                    Cursor c2 = db.rawQuery("SELECT id_locale FROM cities where id_locale = " + c.getString("id_locale"), null);
-                    c2.moveToFirst();
-                    cv.put("id", c.getString("id"));
-                    cv.put("logo", c.getString("logo"));
-                    cv.put("id_locale", c.getString("id_locale"));
-                    cv.put("lang", c.getString("lang"));
-                    cv.put("name", c.getString("name"));
-                    cv.put("visible", c.getString("visible"));
-                    cv.put("last_edit_time", c.getString("last_edit_time"));
-                    db.beginTransaction();
-                    if ((c2.getCount() > 0)) {
-                        db.update("cities", cv, "id_locale = ?", new String[]{c.getString("id_locale")});
-                    } else {
-                        db.insert("cities ", null, cv);
-                    }
-                    c2.close();
-                    db.setTransactionSuccessful();
-                    db.endTransaction();
-                }
-            } catch (final JSONException e) {
-                e.printStackTrace();
-            }
-
-            jsonStr = jsonReader("point_sources.txt", mContext);
-
-            cv = new ContentValues();
-            try {
-                JSONArray points = new JSONArray(jsonStr);
-                for (int i = 0; i < points.length(); i++) {
-                    JSONObject c = points.getJSONObject(i);
-                    Cursor c1 = db.rawQuery("SELECT id FROM points where id = " + c.getString("id"), null);
-                    c1.moveToFirst();
-
-                    cv.put("id", c.getString("id"));
-                    cv.put("id_point", c.getString("id_point"));
-                    cv.put("photo", c.getString("photo"));
-                    cv.put("logo", c.getString("logo"));
-                    cv.put("ord", Integer.parseInt(c.getString("order")));
-                    cv.put("lat", c.getString("lat"));
-                    cv.put("lng", c.getString("lng"));
-                    cv.put("lang", c.getString("lang"));
-                    cv.put("sound", c.getString("sound"));
-                    cv.put("images", c.getString("images"));
-                    cv.put("text", c.getString("text"));
-                    cv.put("name", c.getString("name"));
-                    cv.put("visible", c.getString("visible"));
-                    cv.put("city_id", c.getString("city_id"));
-                    cv.put("last_edit_time", c.getString("last_edit_time"));
-                    db.beginTransaction();
-                    if ((c1.getCount() > 0)) {
-                        db.update("points", cv, "id = ?", new String[]{c.getString("id")});
-                    } else {
-                        db.insert("points ", null, cv);
-                    }
-                    c1.close();
-                    db.setTransactionSuccessful();
-                    db.endTransaction();
-                }
-            } catch (final JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    public static String jsonReader(String jsonName, Context context) {
-        String jsonStr;
-        try {
-            jsonStr = "";
-            AssetManager am = context.getAssets();
-            InputStream is = am.open(jsonName);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String line;
-            while ((line = br.readLine()) != null) {
-                jsonStr += line;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        return jsonStr;
-
+    public boolean passIsRight(LoggedInUser user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,ID_GROUP,PASSWORD},
+                PASSWORD+"= ? ",
+                new String[] {user.getPassword()},
+                null, null, null);
+        //cursor.close();
+        if(cursor.getCount()>0)
+            return true;
+        else return false;
     }
+
+    public boolean userIsExist(LoggedInUser user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,ID_GROUP,PASSWORD},
+        MAIL+"= ? ",
+                new String[] {user.getMail()},
+                null, null, null);
+        //cursor.close();
+       if(cursor.getCount()>0)
+        return true;
+       else return false;
+    }
+
+    public boolean groupIsExist(LoggedInUser user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_GROUPS,new String[] {ID_GROUP},
+                GROUP_NAME+"= ? ",
+                new String[] {user.getGroupName()},
+                null, null, null);
+        //cursor.close();
+        if(cursor.getCount()>0)
+            return true;
+        else return false;
+    }
+    public int getGroupId(LoggedInUser user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_GROUPS,new String[] {ID_GROUP},
+                GROUP_NAME+"= ? ",
+                new String[] {user.getGroupName()},
+                null, null, null);
+            if(cursor.getCount()>0)
+            return cursor.getInt(0);
+            else return 0;
+    }
+
+    public void addUser(LoggedInUser user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        ContentValues values1 = new ContentValues();
+// Задайте значения для каждой строки.
+        values.put(USER_FIO, user.getFIO());
+        values.put(PASSWORD, user.getPassword());
+        //добавление и проверка группы
+        if(this.groupIsExist(user)){
+            values.put(ID_GROUP,this.getGroupId(user));
+            db.insert(TABLE_USERS, null, values);
+            ;
+        }
+        else {
+
+            values1.put(GROUP_NAME, user.getGroupName());
+            db.insert(TABLE_GROUPS, null, values1);
+        }
+        // Inserting Row
+        values.put(ID_GROUP,this.getGroupId(user));
+        db.insert(TABLE_USERS, null, values);
+
+        db.close(); // Closing database connection
+    }
+
+    public LoggedInUser getUser(String mail) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_USERS,new String[] {USER_FIO,MAIL,ID_GROUP,ID_USER},
+                MAIL+"= ? ",
+                new String[] {mail},
+                null, null, null);
+        LoggedInUser user=new LoggedInUser(cursor.getString(0),
+                cursor.getString(1),
+                cursor.getInt(2),
+                cursor.getInt(3));
+        return user;
+    }
+
+  /*  // Creating Tables
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_CONTACTS + "("
+                + KEY_ID + " INTEGER PRIMARY KEY," + KEY_NAME + " TEXT,"
+                + KEY_PH_NO + " TEXT" + ")";
+        db.execSQL(CREATE_CONTACTS_TABLE);
+    }
+
+    // Upgrading database
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Drop older table if existed
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS);
+
+        // Create tables again
+        onCreate(db);
+    }
+
+    // code to add the new contact
+    void addContact(Contact contact) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_NAME, contact.getName()); // Contact Name
+        values.put(KEY_PH_NO, contact.getPhoneNumber()); // Contact Phone
+
+        // Inserting Row
+        db.insert(TABLE_CONTACTS, null, values);
+        //2nd argument is String containing nullColumnHack
+        db.close(); // Closing database connection
+    }
+
+    // code to get the single contact
+    Contact getContact(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_CONTACTS, new String[] { KEY_ID,
+                        KEY_NAME, KEY_PH_NO }, KEY_ID + "=?",
+                new String[] { String.valueOf(id) }, null, null, null, null);
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        Contact contact = new Contact(Integer.parseInt(cursor.getString(0)),
+                cursor.getString(1), cursor.getString(2));
+        // return contact
+        return contact;
+    }
+
+    // code to get all contacts in a list view
+    public List<Contact> getAllContacts() {
+        List<Contact> contactList = new ArrayList<Contact>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_CONTACTS;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Contact contact = new Contact();
+                contact.setID(Integer.parseInt(cursor.getString(0)));
+                contact.setName(cursor.getString(1));
+                contact.setPhoneNumber(cursor.getString(2));
+                // Adding contact to list
+                contactList.add(contact);
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return contactList;
+    }
+
+    // code to update the single contact
+    public int updateContact(Contact contact) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_NAME, contact.getName());
+        values.put(KEY_PH_NO, contact.getPhoneNumber());
+
+        // updating row
+        return db.update(TABLE_CONTACTS, values, KEY_ID + " = ?",
+                new String[] { String.valueOf(contact.getID()) });
+    }
+
+    // Deleting single contact
+    public void deleteContact(Contact contact) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_CONTACTS, KEY_ID + " = ?",
+                new String[] { String.valueOf(contact.getID()) });
+        db.close();
+    }
+
+    // Getting contacts Count
+    public int getContactsCount() {
+        String countQuery = "SELECT  * FROM " + TABLE_CONTACTS;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        cursor.close();
+
+        // return count
+        return cursor.getCount();
+    }*/
+
 }
