@@ -200,23 +200,30 @@ public class DbHelper extends SQLiteOpenHelper {
         cursor.close();
         return user;
     }
-    /*public ArrayList getAllUser() {
+    public ArrayList getAllUser() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_USERS,new String[] {USER_FIO,MAIL,ID_GROUP,ID_USER}, null,
+        Cursor cursor = db.query(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,PASSWORD,ID_GROUP,GROUP_NAME}, null,
                 null,
                 null, null, null);
         cursor.moveToFirst();
-        //ArrayList<LoggedInUser> users[]=new LoggedInUser[cursor.getCount()];
+        ArrayList<LoggedInUser> users=new ArrayList();
         for(int i =0;i<cursor.getCount();i++){
-
+            LoggedInUser user=new LoggedInUser(cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getInt(4),
+                    cursor.getInt(5));
+            users.add(user);
+            cursor.moveToNext();
         }
         LoggedInUser user=new LoggedInUser(cursor.getString(0),
                 cursor.getString(1),
                 cursor.getInt(2),
                 cursor.getInt(3));
         cursor.close();
-        return users[];
-    }*/
+        return users;
+    }
   /*  // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {

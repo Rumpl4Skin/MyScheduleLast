@@ -22,7 +22,7 @@ public class LoggedInUser {
         this.idUser = user.getIdUser();
     }
 
-    public LoggedInUser(String groupName, String FIO, String mail, String password, int idGroup, int idUser) {
+    public LoggedInUser(int idUser, String FIO,String groupName, String mail, String password, int idGroup ) {
         this.groupName = groupName;
         this.FIO = FIO;
         this.mail = mail;
