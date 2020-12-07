@@ -1,5 +1,6 @@
 package com.example.myschedule.ui.admin;
 
+import android.content.ContentValues;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -31,9 +32,19 @@ public class AdminFragment extends Fragment {
     private DbHelper mDBHelper;
     private SQLiteDatabase mDb;
 
+    private static final String TABLE_USERS = "users";
+    private static final String ID_USER = "id_user";
+    private static final String USER_FIO = "fio";
+    private static final String MAIL = "mail";
+    private static final String ID_GROUP = "id_group";
+    private static final String PASSWORD = "password";
+
+    private static final String TABLE_GROUPS = "groups";
+    private static final String GROUP_NAME = "group_name";
+
     EditText edtIdUser,edtFio,edtMail,edtPsw,edtIdGroup,edtGroupName;
     ImageView btnPrev,btnUpdate,btnDel,btnAplly,btnNext;
-    int count=0;
+    public int count=0;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -67,27 +78,70 @@ public class AdminFragment extends Fragment {
         } catch (SQLException mSQLException) {
             throw mSQLException;
         }
-        LoggedInUser[] users=mDBHelper.getAllUser();
+      final LoggedInUser[] users=mDBHelper.getAllUser();
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //galleryViewModel.setAllUsers(users);
 
-               edtIdUser.setText(""+users[0].getIdUser());
-                edtFio.setText(users[0].getFIO());
-                edtMail.setText(users[0].getMail());
-                edtPsw .setText(users[0].getPassword());
-                edtIdGroup.setText(""+users[0].getIdGroup());
+               edtIdUser.setText(""+users[count].getIdUser());
+                edtFio.setText(users[count].getFIO());
+                edtMail.setText(users[count].getMail());
+                edtPsw .setText(users[count].getPassword());
+                edtIdGroup.setText(""+users[count].getIdGroup());
                 //edtGroupName.setText((int)users.get(0).getGroupName());
             }
         });
         btnPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if(count==0)
+                    count=mDBHelper.getAllUser().length-1;
+                else count=count-1;
+                edtIdUser.setText(""+users[count].getIdUser());
+                edtFio.setText(users[count].getFIO());
+                edtMail.setText(users[count].getMail());
+                edtPsw .setText(users[count].getPassword());
+                edtIdGroup.setText(""+users[count].getIdGroup());
             }
         });
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(count==users.length-1)
+                    count=0;
+                else count=count+1;
+                edtIdUser.setText(""+users[count].getIdUser());
+                edtFio.setText(users[count].getFIO());
+                edtMail.setText(users[count].getMail());
+                edtPsw .setText(users[count].getPassword());
+                edtIdGroup.setText(""+users[count].getIdGroup());
+            }
+        });
+btnDel.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        mDb.delete("users",
+                "id_user = ?",
+                new String[] {edtIdUser.getText().toString()});
+    }
+});
+btnAplly.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        ContentValues newValues = new ContentValues();
+// Задайте значения для каждой строки.
+        newValues.put(ID_USER,  edtIdUser.getText().toString());
+        newValues.put(USER_FIO,  edtFio.getText().toString());
+        newValues.put(MAIL,  edtMail.getText().toString());
+        newValues.put(PASSWORD,  edtPsw.getText().toString());
+        newValues.put(ID_GROUP,  edtIdGroup.getText().toString());
 
+// Вставьте строку в вашу базу данных.
+        mDb.insert(TABLE_USERS, null, newValues);
+        //users=mDBHelper.getAllUser();
+    }
+});
 /*galleryViewModel.getUserId().observe(getViewLifecycleOwner(), new Observer<Integer>() {
     @Override
     public void onChanged(Integer integer) {
