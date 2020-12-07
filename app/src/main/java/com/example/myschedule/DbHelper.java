@@ -216,7 +216,7 @@ public class DbHelper extends SQLiteOpenHelper {
                     cursor.getString(3),
                     cursor.getInt(4)
                    );
-            users[i]=new LoggedInUser(user);
+                         users[i]=new LoggedInUser(user);
             cursor.moveToNext();
         }
         cursor.close();
