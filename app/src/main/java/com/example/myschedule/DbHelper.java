@@ -155,7 +155,7 @@ public class DbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_GROUPS,new String[] {ID_GROUP},
                 GROUP_NAME+"= ? ",
-                new String[] {user.getGroupName()},
+                new String[] {user.getGroupName().toString()},
                 null, null, null);
             if(cursor.getCount()>0)
             return cursor.getInt(0);
@@ -170,20 +170,20 @@ public class DbHelper extends SQLiteOpenHelper {
         values.put(USER_FIO, user.getFIO());
         values.put(PASSWORD, user.getPassword());
         //добавление и проверка группы
-        if(this.groupIsExist(user)){
+        if(this.groupIsExist(user)){//если группа существует
             values.put(ID_GROUP,this.getGroupId(user));
             db.insert(TABLE_USERS, null, values);
-            ;
         }
         else {
 
             values1.put(GROUP_NAME, user.getGroupName());
             db.insert(TABLE_GROUPS, null, values1);
+            values.put(ID_GROUP,this.getGroupId(user));
+            db.insert(TABLE_USERS, null, values);
         }
         // Inserting Row
-        values.put(ID_GROUP,this.getGroupId(user));
-        db.insert(TABLE_USERS, null, values);
-
+        values.clear();
+        values1.clear();
         db.close(); // Closing database connection
     }
 

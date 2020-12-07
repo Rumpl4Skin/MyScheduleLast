@@ -163,14 +163,14 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     else
                     {
-                        if(groupEditText.getText().toString()!=""&&passwordEditText.getText().toString()!="")
+                        if(groupEditText.getText().toString()==""&&passwordEditText.getText().toString()=="")
                             Toast.makeText(getApplicationContext(), "Введите название группы и (или) пароль", Toast.LENGTH_LONG).show();
-                        else
+                        else{
                             mDBHelper.addUser(new LoggedInUser(usernameEditText.getText().toString(),
                                 passwordEditText.getText().toString(),
                                 groupEditText.getText().toString()));
                         Toast.makeText(getApplicationContext(), "Регистрация успешна!", Toast.LENGTH_SHORT).show();
-                        passwordEditText.setText("");
+                        passwordEditText.setText("");}
                     }
 
                 }

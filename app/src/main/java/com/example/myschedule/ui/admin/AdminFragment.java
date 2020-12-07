@@ -127,6 +127,7 @@ btnDel.setOnClickListener(new View.OnClickListener() {
                 "id_user = ?",
                 new String[] {edtIdUser.getText().toString()});
         Toast.makeText(getContext(), "Запись удалена, обновите админку", Toast.LENGTH_SHORT).show();
+        count--;
     }
 });
 btnAplly.setOnClickListener(new View.OnClickListener() {
@@ -143,6 +144,7 @@ btnAplly.setOnClickListener(new View.OnClickListener() {
 
 // Вставьте строку в вашу базу данных.
         mDb.insert(TABLE_USERS, null, newValues);
+        count++;
         //users=mDBHelper.getAllUser();
 mDb.close();
         Toast.makeText(getContext(), "Запись отредактирована!", Toast.LENGTH_SHORT).show();
