@@ -48,6 +48,7 @@ public class HomeFragment extends Fragment {
                 final TeamsAdapter adapter = new TeamsAdapter(getContext(), R.layout.team, teamsList);
                 //mVehicleAdapter = new VehicleAdapter(getContext(), vehicleList, new VehicleListener());
                 listView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
 
                 //listView.setRecyclerListener();
             }

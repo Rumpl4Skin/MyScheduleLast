@@ -7,6 +7,8 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.myschedule.data.Admins;
+import com.example.myschedule.data.Docs;
 import com.example.myschedule.data.model.LoggedInUser;
 
 import java.io.File;
@@ -19,7 +21,7 @@ import java.util.List;
 
 public class DbHelper extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 7;
     private static final String DB_NAME = "1.sqlite";
     private static String DB_PATH = null;
     private SQLiteDatabase mDataBase;
@@ -36,6 +38,16 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String TABLE_GROUPS = "groups";
     private static final String GROUP_NAME = "group_name";
 
+    private static final String TABLE_ADMINS = "admins";
+    private static final String ID_ADMINS = "id_admins";
+    private static final String ADMINS_FIO = "fio_admins";
+    private static final String ADMINS_DOLJN = "doljn";
+    private static final String ADMINS_IMG = "admins_img";
+
+    private static final String TABLE_DOCS = "Docs";
+    private static final String ID_DOC = "id_doc";
+    private static final String NAME_DOC = "name_doc";
+    private static final String IMG_DOC = "doc_img";
 
     public DbHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -139,6 +151,17 @@ public class DbHelper extends SQLiteOpenHelper {
         return true;
        else return false;
     }
+    public boolean userIsExistAny(LoggedInUser user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,ID_GROUP,PASSWORD},
+                MAIL+"= ? OR "+ID_USER+"= ? ",
+                new String[] {user.getMail(),""+user.getIdUser()},
+                null, null, null);
+        //cursor.close();
+        if(cursor.getCount()>0)
+            return true;
+        else return false;
+    }
 
     public boolean groupIsExist(LoggedInUser user) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -146,6 +169,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 GROUP_NAME+"= ? ",
                 new String[] {user.getGroupName()},
                 null, null, null);
+        cursor.moveToFirst();
         //cursor.close();
         if(cursor.getCount()>0)
             return true;
@@ -157,9 +181,21 @@ public class DbHelper extends SQLiteOpenHelper {
                 GROUP_NAME+"= ? ",
                 new String[] {user.getGroupName().toString()},
                 null, null, null);
+        cursor.moveToFirst();
             if(cursor.getCount()>0)
             return cursor.getInt(0);
             else return 0;
+    }
+    public String getGroupName(Integer id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_GROUPS,new String[] {GROUP_NAME},
+                ID_GROUP+"= ? ",
+                new String[] {id.toString()},
+                null, null, null);
+        cursor.moveToFirst();
+        if(cursor.getCount()>0)
+            return cursor.getString(0);
+        else return "NONE";
     }
 
     public void addUser(LoggedInUser user) {
@@ -169,39 +205,42 @@ public class DbHelper extends SQLiteOpenHelper {
 // Задайте значения для каждой строки.
         values.put(USER_FIO, user.getFIO());
         values.put(PASSWORD, user.getPassword());
+        values.put(MAIL, user.getMail());
         //добавление и проверка группы
         if(this.groupIsExist(user)){//если группа существует
             values.put(ID_GROUP,this.getGroupId(user));
             db.insert(TABLE_USERS, null, values);
         }
-        else {
+        else {//создание группы и добавление пользователя
 
             values1.put(GROUP_NAME, user.getGroupName());
             db.insert(TABLE_GROUPS, null, values1);
             values.put(ID_GROUP,this.getGroupId(user));
             db.insert(TABLE_USERS, null, values);
         }
-        // Inserting Row
+
         values.clear();
         values1.clear();
-        db.close(); // Closing database connection
     }
 
     public LoggedInUser getUser(String mail) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_USERS,new String[] {USER_FIO,MAIL,ID_GROUP,ID_USER},
+        Cursor cursor = db.query(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,PASSWORD,ID_GROUP},
                 MAIL+"= ? ",
                 new String[] {mail},
                 null, null, null);
         cursor.moveToFirst();
-        LoggedInUser user=new LoggedInUser(cursor.getString(0),
+        LoggedInUser user=new LoggedInUser(
+                cursor.getInt(0),
                 cursor.getString(1),
-                cursor.getInt(2),
-                cursor.getInt(3));
+                cursor.getString(2),
+                cursor.getString(3),
+                cursor.getInt(4),
+                this.getGroupName(cursor.getInt(4)));
         cursor.close();
         return user;
     }
-    public LoggedInUser[] getAllUser() {
+   final public LoggedInUser[] getAllUser() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.query(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,PASSWORD,ID_GROUP}, null,
                 null,
@@ -221,6 +260,50 @@ public class DbHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return users;
+    }
+
+
+
+    final public Admins[] getAllAdmins() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.query(TABLE_ADMINS,new String[] {ID_ADMINS,ADMINS_FIO,ADMINS_DOLJN,ADMINS_IMG}, null,
+                null,
+                null, null, null);
+        cursor.moveToFirst();
+        Admins[] admins=new Admins[cursor.getCount()];
+        for(int i =0;i<cursor.getCount();i++){
+            Admins admin=new Admins(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getString(3)
+
+            );
+            admins[i]=new Admins(admin);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return admins;
+    }
+
+    final public Docs[] getAllDocs() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.query(TABLE_DOCS,new String[] {ID_DOC,NAME_DOC,IMG_DOC}, null,
+                null,
+                null, null, null);
+        cursor.moveToFirst();
+        Docs[] docs=new Docs[cursor.getCount()];
+        for(int i =0;i<cursor.getCount();i++){
+            Docs doc=new Docs(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2)
+            );
+            docs[i]=new Docs(doc);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return docs;
     }
   /*  // Creating Tables
     @Override

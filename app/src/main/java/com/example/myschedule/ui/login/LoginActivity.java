@@ -63,6 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         usernameEditText = findViewById(R.id.mail);
         final EditText passwordEditText = findViewById(R.id.password);
         final EditText groupEditText = findViewById(R.id.id_group);
+        final EditText fioEditText = findViewById(R.id.user_fio);
         final Button loginButton = findViewById(R.id.login);
         final Button registrButton = findViewById(R.id.registr);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
@@ -155,18 +156,21 @@ public class LoginActivity extends AppCompatActivity {
         registrButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LoggedInUser user=new LoggedInUser(usernameEditText.getText().toString(),passwordEditText.getText().toString());
+                LoggedInUser user=new LoggedInUser(usernameEditText.getText().toString(),
+                        passwordEditText.getText().toString());
                 if(!mDBHelper.userIsExist(user)){//пользователь не существует
-                    if(groupEditText.getVisibility()==View.GONE){
+                    if(groupEditText.getVisibility()==View.GONE){//ввод группы
                         groupEditText.setVisibility(View.VISIBLE);
-                        Toast.makeText(getApplicationContext(), "Введите название группы", Toast.LENGTH_SHORT).show();
+                        fioEditText.setVisibility(View.VISIBLE);
+                        Toast.makeText(getApplicationContext(), "Введите название группы и фио", Toast.LENGTH_SHORT).show();
                     }
                     else
                     {
-                        if(groupEditText.getText().toString()==""&&passwordEditText.getText().toString()=="")
-                            Toast.makeText(getApplicationContext(), "Введите название группы и (или) пароль", Toast.LENGTH_LONG).show();
+                        if(groupEditText.getText().toString()==""&&passwordEditText.getText().toString()==""&&fioEditText.getText().toString()=="")
+                            Toast.makeText(getApplicationContext(), "Не все поля регистрации заполнены", Toast.LENGTH_LONG).show();
                         else{
-                            mDBHelper.addUser(new LoggedInUser(usernameEditText.getText().toString(),
+                            mDBHelper.addUser(new LoggedInUser(fioEditText.getText().toString(),
+                                    usernameEditText.getText().toString(),
                                 passwordEditText.getText().toString(),
                                 groupEditText.getText().toString()));
                         Toast.makeText(getApplicationContext(), "Регистрация успешна!", Toast.LENGTH_SHORT).show();

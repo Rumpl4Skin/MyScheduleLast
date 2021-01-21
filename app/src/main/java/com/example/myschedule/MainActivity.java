@@ -1,8 +1,10 @@
 package com.example.myschedule;
 
+import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
 import android.widget.TextView;
@@ -12,8 +14,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -77,9 +82,9 @@ public class MainActivity extends AppCompatActivity {
             user_fio.setText(user.getFIO());
             user_mail.setText(user.getMail());
         }
-        if(user.getMail()=="admen@gmail.com"){
+        if(user.getMail().toString().equals("admen@gmail.com")){
             mAppBarConfiguration = new AppBarConfiguration.Builder(
-                    R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,R.id.nav_admen)
+                    R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,R.id.nav_admen,R.id.nav_doc_detail,R.id.nav_profile)
                     .setDrawerLayout(drawer)
                     .build();
         }
@@ -87,21 +92,43 @@ public class MainActivity extends AppCompatActivity {
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
                 .setDrawerLayout(drawer)
-                .build();}
+                .build();
+        }
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-
-
-
-
     }
-
+public NavController getNavController(){
+    NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        return navController;
+}
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        switch(id){
+
+            case R.id.nav_profile :
+                Bundle bundle = new Bundle();
+                bundle.putString("user_fio", user.getFIO());
+                bundle.putString("user_mail", user.getMail());
+                bundle.putString("user_group_name", user.getGroupName());
+                bundle.putString("user_pass", user.getPassword());
+                getNavController().navigate(R.id.nav_profile,bundle);
+                return true;
+            case R.id.action_exit:
+                FragmentManager manager = getSupportFragmentManager();
+                MyDialogFragment myDialogFragment = new MyDialogFragment();
+                myDialogFragment.show(manager, "myDialog");
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

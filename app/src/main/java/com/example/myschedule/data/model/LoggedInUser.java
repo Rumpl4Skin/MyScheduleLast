@@ -12,6 +12,8 @@ public class LoggedInUser {
     private int idGroup;
     private int idUser;
 
+    public LoggedInUser() {
+    }
 
     public LoggedInUser(LoggedInUser user) {
         this.groupName = user.groupName;
@@ -21,7 +23,17 @@ public class LoggedInUser {
         this.idGroup = user.getIdGroup();
         this.idUser = user.getIdUser();
     }
-
+public void clear(LoggedInUser[] mas){
+        for(int i=0;i<mas.length;i++)
+        {
+            mas[i].setGroupName(null);
+            mas[i].setFIO(null);
+            mas[i].setMail(null);
+            mas[i].setPassword(null);
+            mas[i].setIdGroup(0);
+            mas[i].setIdUser(0);
+        }
+}
     public LoggedInUser(int idUser, String FIO,String mail,String password,int idGroup,String groupName) {
         this.groupName = groupName;
         this.FIO = FIO;
@@ -45,6 +57,12 @@ public class LoggedInUser {
     }
 
     public LoggedInUser(String mail, String password, String groupName) {
+        this.groupName = groupName;
+        this.password = password;
+        this.mail = mail;
+    }
+    public LoggedInUser(String fio, String mail, String password, String groupName) {
+        this.FIO=fio;
         this.groupName = groupName;
         this.password = password;
         this.mail = mail;

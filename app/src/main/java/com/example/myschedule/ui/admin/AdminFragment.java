@@ -46,6 +46,7 @@ public class AdminFragment extends Fragment {
     EditText edtIdUser,edtFio,edtMail,edtPsw,edtIdGroup,edtGroupName;
     ImageView btnPrev,btnUpdate,btnDel,btnAplly,btnNext;
     public int count=0;
+    LoggedInUser[] users;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -79,17 +80,29 @@ public class AdminFragment extends Fragment {
         } catch (SQLException mSQLException) {
             throw mSQLException;
         }
-      final LoggedInUser[] users=mDBHelper.getAllUser();
+        LoggedInUser us=new LoggedInUser();
+        users = mDBHelper.getAllUser();
+
+        count=0;
+        us.clear(users);
+        users=mDBHelper.getAllUser();
+        edtIdUser.setText(""+ users[count].getIdUser());
+        edtFio.setText(users[count].getFIO());
+        edtMail.setText(users[count].getMail());
+        edtPsw .setText(users[count].getPassword());
+        edtIdGroup.setText(""+ users[count].getIdGroup());
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //galleryViewModel.setAllUsers(users);
-
-               edtIdUser.setText(""+users[count].getIdUser());
+                count=0;
+                us.clear(users);
+                users=mDBHelper.getAllUser();
+               edtIdUser.setText(""+ users[count].getIdUser());
                 edtFio.setText(users[count].getFIO());
                 edtMail.setText(users[count].getMail());
                 edtPsw .setText(users[count].getPassword());
-                edtIdGroup.setText(""+users[count].getIdGroup());
+                edtIdGroup.setText(""+ users[count].getIdGroup());
                 //edtGroupName.setText((int)users.get(0).getGroupName());
                 Toast.makeText(getContext(), "Обновлено", Toast.LENGTH_SHORT).show();
             }
@@ -100,24 +113,24 @@ public class AdminFragment extends Fragment {
                 if(count==0)
                     count=mDBHelper.getAllUser().length-1;
                 else count=count-1;
-                edtIdUser.setText(""+users[count].getIdUser());
+                edtIdUser.setText(""+ users[count].getIdUser());
                 edtFio.setText(users[count].getFIO());
                 edtMail.setText(users[count].getMail());
                 edtPsw .setText(users[count].getPassword());
-                edtIdGroup.setText(""+users[count].getIdGroup());
+                edtIdGroup.setText(""+ users[count].getIdGroup());
             }
         });
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(count==users.length-1)
+                if(count== users.length-1)
                     count=0;
                 else count=count+1;
-                edtIdUser.setText(""+users[count].getIdUser());
+                edtIdUser.setText(""+ users[count].getIdUser());
                 edtFio.setText(users[count].getFIO());
                 edtMail.setText(users[count].getMail());
                 edtPsw .setText(users[count].getPassword());
-                edtIdGroup.setText(""+users[count].getIdGroup());
+                edtIdGroup.setText(""+ users[count].getIdGroup());
             }
         });
 btnDel.setOnClickListener(new View.OnClickListener() {
@@ -136,6 +149,14 @@ btnAplly.setOnClickListener(new View.OnClickListener() {
 
         ContentValues newValues = new ContentValues();
 // Задайте значения для каждой строки.
+ if(mDBHelper.userIsExistAny(users[count])){
+            newValues.put(USER_FIO,  edtFio.getText().toString());
+            newValues.put(MAIL,  edtMail.getText().toString());
+            newValues.put(PASSWORD,  edtPsw.getText().toString());
+            newValues.put(ID_GROUP,  edtIdGroup.getText().toString());
+            mDb.update (TABLE_USERS, newValues, ID_USER+"="+edtIdUser.getText().toString(), null);
+       }
+ else{
         newValues.put(ID_USER,  edtIdUser.getText().toString());
         newValues.put(USER_FIO,  edtFio.getText().toString());
         newValues.put(MAIL,  edtMail.getText().toString());
@@ -145,8 +166,10 @@ btnAplly.setOnClickListener(new View.OnClickListener() {
 // Вставьте строку в вашу базу данных.
         mDb.insert(TABLE_USERS, null, newValues);
         count++;
+ }
+
         //users=mDBHelper.getAllUser();
-mDb.close();
+//mDb.close();
         Toast.makeText(getContext(), "Запись отредактирована!", Toast.LENGTH_SHORT).show();
     }
 });
