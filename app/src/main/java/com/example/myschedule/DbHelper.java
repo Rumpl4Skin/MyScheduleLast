@@ -305,6 +305,15 @@ public class DbHelper extends SQLiteOpenHelper {
         cursor.close();
         return docs;
     }
+
+    /*public void userUpdate(LoggedInUser user,LoggedInUser new_user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.update(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,ID_GROUP,PASSWORD},
+                MAIL+"= ? OR "+ID_USER+"= ? ",
+                new String[] {user.getMail(),""+user.getIdUser()},
+                null, null, null);
+
+    }*/
   /*  // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
