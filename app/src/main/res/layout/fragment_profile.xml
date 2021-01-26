@@ -55,7 +55,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edtMail" />
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/edtIDGroup"
         android:layout_width="310dp"
         android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
         android:layout_marginTop="8dp"
         android:ems="10"
         android:enabled="false"
-        android:inputType="number"
+        android:inputType="textPersonName"
         android:text="@string/prompt_group"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edtPass" />

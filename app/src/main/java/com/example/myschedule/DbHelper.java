@@ -21,7 +21,7 @@ import java.util.List;
 
 public class DbHelper extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 7;
+    private static final int DB_VERSION = 8;
     private static final String DB_NAME = "1.sqlite";
     private static String DB_PATH = null;
     private SQLiteDatabase mDataBase;
@@ -162,6 +162,38 @@ public class DbHelper extends SQLiteOpenHelper {
             return true;
         else return false;
     }
+    public boolean adminIsExistAny(Admins admin) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_ADMINS,new String[] {ID_ADMINS,ADMINS_FIO,ADMINS_DOLJN,ADMINS_IMG},
+                ADMINS_FIO+"= ? OR "+ID_ADMINS+"= ? ",
+                new String[] {admin.getFio(),""+admin.getId_admins()},
+                null, null, null);
+        //cursor.close();
+        if(cursor.getCount()>0)
+            return true;
+        else return false;
+    }
+    public boolean userIsExistWithMail(String mail) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,ID_GROUP,PASSWORD},
+                MAIL+"= ? ",
+                new String[] {mail},
+                null, null, null);
+        if(cursor.getCount()>0)
+            return true;
+        else return false;
+    }
+
+    public boolean adminIsExistWithFio(String fio) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_ADMINS,new String[] {ID_ADMINS,ADMINS_FIO},
+                ADMINS_FIO+"= ? ",
+                new String[] {fio},
+                null, null, null);
+        if(cursor.getCount()>0)
+            return true;
+        else return false;
+    }
 
     public boolean groupIsExist(LoggedInUser user) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -185,6 +217,17 @@ public class DbHelper extends SQLiteOpenHelper {
             if(cursor.getCount()>0)
             return cursor.getInt(0);
             else return 0;
+    }
+    public int getGroupId(String groupName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_GROUPS,new String[] {ID_GROUP},
+                GROUP_NAME+"= ? ",
+                new String[] {groupName},
+                null, null, null);
+        cursor.moveToFirst();
+        if(cursor.getCount()>0)
+            return cursor.getInt(0);
+        else return 0;
     }
     public String getGroupName(Integer id) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -253,7 +296,8 @@ public class DbHelper extends SQLiteOpenHelper {
                     cursor.getString(1),
                     cursor.getString(2),
                     cursor.getString(3),
-                    cursor.getInt(4)
+                    cursor.getInt(4),
+                    this.getGroupName(cursor.getInt(4))
                    );
                          users[i]=new LoggedInUser(user);
             cursor.moveToNext();
@@ -306,14 +350,47 @@ public class DbHelper extends SQLiteOpenHelper {
         return docs;
     }
 
-    /*public void userUpdate(LoggedInUser user,LoggedInUser new_user) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.update(TABLE_USERS,new String[] {ID_USER,USER_FIO,MAIL,ID_GROUP,PASSWORD},
-                MAIL+"= ? OR "+ID_USER+"= ? ",
-                new String[] {user.getMail(),""+user.getIdUser()},
-                null, null, null);
+    public void userUpdate(LoggedInUser user,LoggedInUser new_user) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
-    }*/
+        ContentValues values=new ContentValues();
+        values.put(USER_FIO,new_user.getFIO());
+        values.put(MAIL,new_user.getMail());
+        values.put(PASSWORD,new_user.getPassword());
+        values.put(ID_GROUP,this.getGroupId(new_user));
+
+        db.update(TABLE_USERS,
+                values,
+                MAIL+"=?",
+                new String[] {user.getMail()});
+
+    }
+    public String[] getAllGroupName() {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_GROUPS,new String[] {GROUP_NAME}, null,
+                null,
+                null, null, null);
+        cursor.moveToFirst();
+        String[] groupNames=new String[cursor.getCount()];
+        for(int i =0;i<cursor.getCount();i++){
+            groupNames[i]=new String(cursor.getString(0));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return groupNames;
+    }
+    public boolean groupNameExist() {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_GROUPS,new String[] {GROUP_NAME}, null,
+                null,
+                null, null, null);
+        cursor.moveToFirst();
+        if(cursor.getCount()>0)
+        return true;
+        else  return false;
+    }
   /*  // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {

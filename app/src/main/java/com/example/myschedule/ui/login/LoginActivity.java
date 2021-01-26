@@ -173,7 +173,7 @@ public class LoginActivity extends AppCompatActivity {
                                     usernameEditText.getText().toString(),
                                 passwordEditText.getText().toString(),
                                 groupEditText.getText().toString()));
-                        Toast.makeText(getApplicationContext(), "Регистрация успешна!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Регистрация успешна! Повторно введите пароль", Toast.LENGTH_SHORT).show();
                         passwordEditText.setText("");}
                     }
 

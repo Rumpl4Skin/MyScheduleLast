@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.myschedule"
-        minSdkVersion 19
+        minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -29,6 +29,8 @@ android {
 }
 
 dependencies {
+    implementation files("C:\\Users\\markk\\Desktop\\AndroidReadXLSX-master\\example\\app\\libs\\aa-poi-ooxml-schemas-3.10-reduced-more-0.1.5.jar")
+    implementation files("C:\\Users\\markk\\Desktop\\AndroidReadXLSX-master\\example\\app\\libs\\aa-poi-3.10-min-0.1.5.jar")
     compile 'com.bogdwellers:pinchtozoom:0.1'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'

@@ -40,7 +40,7 @@ public class MyDialogFragment extends DialogFragment {
         return builder.create();
     }
 
-    public Dialog MyDialogFragment(String title,String mes,String btn1,String btn2) {
+    public Dialog MyDialogFragment(String title, String mes, String btn1, String btn2, DialogInterface.OnClickListener listener1,DialogInterface.OnClickListener listener2) {
         String t = title;
         String message = mes;
         String button1String = btn1;
@@ -49,16 +49,8 @@ public class MyDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(t);  // заголовок
         builder.setMessage(message); // сообщение
-        builder.setPositiveButton(button1String, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                startActivity(new Intent(getActivity(), LoginActivity.class));
-            }
-        });
-        builder.setNegativeButton(button2String, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                getActivity().finishAffinity();
-            }
-        });
+        builder.setPositiveButton(button1String, listener1);
+        builder.setNegativeButton(button2String, listener2);
         builder.setCancelable(true);
 
         return builder.create();

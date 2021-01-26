@@ -30,8 +30,8 @@ public class HomeViewModel extends ViewModel {
     // Get vehicle list of data return type MutableLiveData
     MutableLiveData<List<Team>> getTeamData() {
         TeamData = new MutableLiveData<List<Team>>();
-        if (true/*teamsList.size()==0*/){
-            new DownloadWebpageTask(new AsyncResult() {
+        //if (true/*teamsList.size()==0*/){
+         /*   new DownloadWebpageTask(new AsyncResult() {
                 @Override
                 public void onResult(JSONObject object) {
                     processJson(object);
@@ -41,7 +41,7 @@ public class HomeViewModel extends ViewModel {
 
         }
         //loadAllTeam();
-        TeamData.postValue(teamsList);
+        TeamData.postValue(teamsList);*/
         return TeamData;
     }
 
