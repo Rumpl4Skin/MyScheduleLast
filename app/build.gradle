@@ -15,7 +15,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+dependencies {
+   compile files('libs/aa-poi-3.10-min-0.1.5.jar')
+}
     buildTypes {
         release {
             minifyEnabled false
@@ -29,8 +31,12 @@ android {
 }
 
 dependencies {
-    implementation files("C:\\Users\\markk\\Desktop\\AndroidReadXLSX-master\\example\\app\\libs\\aa-poi-ooxml-schemas-3.10-reduced-more-0.1.5.jar")
-    implementation files("C:\\Users\\markk\\Desktop\\AndroidReadXLSX-master\\example\\app\\libs\\aa-poi-3.10-min-0.1.5.jar")
+    //implementation files("C:\\Users\\markk\\Desktop\\AndroidReadXLSX-master\\example\\app\\libs\\aa-poi-ooxml-schemas-3.10-reduced-more-0.1.5.jar")
+    //implementation files("\\app\\libs\\aa-poi-3.10-min-0.1.5.jar\\")
+   implementation files("libs\\aa-poi-3.10-min-0.1.5.jar\\")
+    implementation files("libs\\poi-3.10.jar\\")
+    implementation files("libs\\aa-poi-ooxml-schemas-3.10-reduced-more-0.1.5.jar\\")
+
     compile 'com.bogdwellers:pinchtozoom:0.1'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'

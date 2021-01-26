@@ -43,8 +43,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,6 +54,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -110,7 +110,7 @@ public class HomeFragment extends Fragment {
             XSSFWorkbook workbook = new XSSFWorkbook(stream);
             XSSFSheet sheet = workbook.getSheetAt(0);
             int rowsCount = sheet.getPhysicalNumberOfRows();
-            List<right> right = null;
+            right right = new right("10",4,3);
             FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
             /*for (int r = 0; r<rowsCount; r++) {
                 Row row = sheet.getRow(r);
@@ -125,23 +125,23 @@ public class HomeFragment extends Fragment {
                     //Toast.makeText(getActivity().getApplicationContext(), cellInfo, Toast.LENGTH_SHORT).show();
                 }
             }*/
-            right.add(new right("10",4,3));
+            //right.add(new right("10",4,3));
             if(right!=null)
-            for(int i=0;i<right.size();i++){
-                Row row = sheet.getRow(right.get(i).row);
-                    String value = getCellAsString(row,right.get(i).count, formulaEvaluator);
+            for(int i=0;i<1/*right.size()*/;i++){
+                Row row = sheet.getRow(right.row);
+                    String value = getCellAsString(row,right.count, formulaEvaluator);
                     if(value==user.getGroupName()) {
                         for(int j=0;j<14;j++)//заполнение ячеек расписания
                         {
                             Subject s=new Subject();
-                            row = sheet.getRow(right.get(i).row+1);
-                            s.setCab(getCellAsString(row,right.get(i).count+1, formulaEvaluator));
+                            row = sheet.getRow(right.row+1);
+                            s.setCab(getCellAsString(row,right.count+1, formulaEvaluator));
 
-                            row = sheet.getRow(right.get(i).row+1);
-                            s.setTime(getCellAsString(row,right.get(i).count-1, formulaEvaluator));
+                            row = sheet.getRow(right.row+1);
+                            s.setTime(getCellAsString(row,right.count-1, formulaEvaluator));
 
-                             row = sheet.getRow(right.get(i).row+1);
-                            s.setSubjectName(getCellAsString(row,right.get(i).count, formulaEvaluator));
+                             row = sheet.getRow(right.row+1);
+                            s.setSubjectName(getCellAsString(row,right.count, formulaEvaluator));
                             subjects[j]=new Subject(s);
                         }
                     }
