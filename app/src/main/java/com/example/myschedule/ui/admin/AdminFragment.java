@@ -72,7 +72,7 @@ public class AdminFragment extends Fragment {
     Admins[] admins;
     LoggedInUser us;
     Admins adm;
-    String[] mods = { MOD_USERS, MOD_ADMIN ,MOD_ZAYV,  MOD_DISC};
+    String[] mods = { MOD_USERS, MOD_ADMIN /*,MOD_ZAYV,  MOD_DISC*/};
     String selected_mode=MOD_USERS;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -129,7 +129,7 @@ public class AdminFragment extends Fragment {
                 switch (selectedItemPosition){
                     case 0://пользователи
                         edtPsw.setVisibility(View.VISIBLE);
-                        edtIdGroup.setVisibility(View.VISIBLE);
+                        edtIdGroup.setVisibility(View.GONE);
                         edtGroupName.setVisibility(View.VISIBLE);
                         setModeUsers();
                         List<String> namesList = Arrays.asList(mDBHelper.getAllGroupName());
@@ -139,10 +139,10 @@ public class AdminFragment extends Fragment {
                         edtGroupName.setThreshold(1);
 
                         count=0;
-                        if(users.length>0)
-                        us.clear(users);
+                        /*if(users.length>0)
+                        us.clear(users);*/
                         users=mDBHelper.getAllUser();
-                        edtIdUser.setText(""+ users[count].getIdUser());
+                        //edtIdUser.setText(""+ users[count].getIdUser());
                         edtFio.setText(users[count].getFIO());
                         edtMail.setText(users[count].getMail());
                         edtPsw .setText(users[count].getPassword());
@@ -155,7 +155,7 @@ public class AdminFragment extends Fragment {
                             @Override
                             public void onClick(View v) {
                                 count=0;
-                                us.clear(users);
+                                //us.clear(users);
                                 users=mDBHelper.getAllUser();
                                 edtIdUser.setText(""+ users[count].getIdUser());
                                 edtFio.setText(users[count].getFIO());
@@ -269,7 +269,7 @@ public class AdminFragment extends Fragment {
                         }
                     });
                         setModeAdmin();
-                        adm.clear(admins);
+                        //adm.clear(admins);
                         admins=mDBHelper.getAllAdmins();
                         edtIdUser.setText(""+ admins[count].getId_admins());
                         edtFio.setText(admins[count].getFio());
@@ -285,7 +285,7 @@ public class AdminFragment extends Fragment {
                             @Override
                             public void onClick(View v) {
                                 count=0;
-                                adm.clear(admins);
+                                //adm.clear(admins);
                                 admins=mDBHelper.getAllAdmins();
                                 edtIdUser.setText(""+ admins[count].getId_admins());
                                 edtFio.setText(admins[count].getFio());
@@ -394,8 +394,7 @@ public class AdminFragment extends Fragment {
         edtGroupName.setThreshold(1);
 
         count=0;
-        if(users[0].getGroupName()!=null)
-        us.clear(users);
+       // us.clear(users);
         users=mDBHelper.getAllUser();
         edtIdUser.setText(""+ users[count].getIdUser());
         edtFio.setText(users[count].getFIO());
@@ -410,13 +409,13 @@ public class AdminFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 count=0;
-                us.clear(users);
+                //us.clear(users);
                 users=mDBHelper.getAllUser();
                edtIdUser.setText(""+ users[count].getIdUser());
                 edtFio.setText(users[count].getFIO());
                 edtMail.setText(users[count].getMail());
                 edtPsw .setText(users[count].getPassword());
-                edtIdGroup.setText(""+ users[count].getIdGroup());
+                //edtIdGroup.setText(""+ users[count].getIdGroup());
                 edtGroupName.setText(users[count].getGroupName());
                 Toast.makeText(getContext(), "Обновлено", Toast.LENGTH_SHORT).show();
             }
@@ -431,7 +430,7 @@ public class AdminFragment extends Fragment {
                 edtFio.setText(users[count].getFIO());
                 edtMail.setText(users[count].getMail());
                 edtPsw .setText(users[count].getPassword());
-                edtIdGroup.setText(""+ users[count].getIdGroup());
+                //edtIdGroup.setText(""+ users[count].getIdGroup());
                 edtGroupName.setText(users[count].getGroupName());
             }
         });
@@ -445,7 +444,7 @@ public class AdminFragment extends Fragment {
                 edtFio.setText(users[count].getFIO());
                 edtMail.setText(users[count].getMail());
                 edtPsw .setText(users[count].getPassword());
-                edtIdGroup.setText(""+ users[count].getIdGroup());
+                //edtIdGroup.setText(""+ users[count].getIdGroup());
                 edtGroupName.setText(users[count].getGroupName());
             }
         });
@@ -549,18 +548,18 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
     }
     public void updateUsersUI(){
         count=0;
-        us.clear(users);
+//        us.clear(users);
         users=mDBHelper.getAllUser();
         edtIdUser.setText(""+ users[count].getIdUser());
         edtFio.setText(users[count].getFIO());
         edtMail.setText(users[count].getMail());
         edtPsw .setText(users[count].getPassword());
-        edtIdGroup.setText(""+ users[count].getIdGroup());
+        //edtIdGroup.setText(""+ users[count].getIdGroup());
         edtGroupName.setText(users[count].getGroupName());
     }
     public void updateAdminsUI(){
         count=0;
-        adm.clear(admins);
+        //adm.clear(admins);
         admins=mDBHelper.getAllAdmins();
         edtIdUser.setText(""+ admins[count].getId_admins());
         edtFio.setText(admins[count].getFio());
@@ -570,9 +569,9 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
     public void setModeAdmin(){
 
         count=0;
-        adm.clear(admins);
+        //adm.clear(admins);
         admins=mDBHelper.getAllAdmins();
-        edtIdUser.setText(""+ users[count].getIdUser());
+        edtIdUser.setText(""+ admins[count].getId_admins());
         edtFio.setText(admins[count].getFio());
         edtIdUser.setHint(R.string.un_id);
         edtMail.setText(admins[count].getDiljn());
@@ -588,11 +587,11 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
 
         imgAdmins.setVisibility(View.GONE);
         edtPsw.setVisibility(View.VISIBLE);
-        edtIdGroup.setVisibility(View.VISIBLE);
+        edtIdGroup.setVisibility(View.GONE);
         edtGroupName.setVisibility(View.VISIBLE);
 
         count=0;
-        us.clear(users);
+//        us.clear(users);
         users=mDBHelper.getAllUser();
         edtIdUser.setText(""+ users[count].getIdUser());
         edtFio.setText(users[count].getFIO());

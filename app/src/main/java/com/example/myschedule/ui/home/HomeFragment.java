@@ -1,60 +1,30 @@
 package com.example.myschedule.ui.home;
 
+
 import android.content.res.AssetManager;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myschedule.DbHelper;
 import com.example.myschedule.R;
-import com.example.myschedule.adapters.AdminRecycleListAdapter;
 import com.example.myschedule.adapters.ScheduleRecycleListAdapter;
-import com.example.myschedule.adapters.TeamsAdapter;
-import com.example.myschedule.data.Admins;
 import com.example.myschedule.data.Subject;
-import com.example.myschedule.data.Team;
 import com.example.myschedule.data.model.LoggedInUser;
-
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Row;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -93,16 +63,16 @@ public class HomeFragment extends Fragment {
         GroupName.setThreshold(1);
 
         assetManager = getActivity().getAssets();
-        Subject[] subjects=new Subject[14];
-        readExcelFileFromAssets(subjects);
-        /*{new Subject("9.00-10.40","Ботаника","10 лаб","26"),
-                new Subject("8.55-9.40","Контроль качества продукции в сфере д/о и призводства мебели","fdkjgflkgjdjdlgjfdlkgjldjglfdfgjd","26")};*/
+        //Subject[] subjects=new Subject[14];
+        //readExcelFileFromAssets(subjects);
+        Subject[] subjects={new Subject("9.00-10.40","Ботаника","10 лаб","26"),
+                new Subject("8.55-9.40","Контроль качества продукции в сфере д/о и призводства мебели","fdkjgflkgjdjdlgjfdlkgjldjglfdfgjd","26")};
         recyclerView = root.findViewById(R.id.shedule_RecList);
         recyclerView.setLayoutManager(new LinearLayoutManager(root.getContext()));
         recyclerView.setAdapter(new ScheduleRecycleListAdapter(subjects,root.getContext()));
         return root;
     }
-    public void readExcelFileFromAssets(Subject[] subjects) {
+   /* public void readExcelFileFromAssets(Subject[] subjects) {
 
 
         try {
@@ -126,8 +96,8 @@ public class HomeFragment extends Fragment {
                 }
             }*/
             //right.add(new right("10",4,3));
-            if(right!=null)
-            for(int i=0;i<1/*right.size()*/;i++){
+           /* if(right!=null)
+            for(int i=0;i<1/*right.size()*/;/*i++){
                 Row row = sheet.getRow(right.row);
                     String value = getCellAsString(row,right.count, formulaEvaluator);
                     if(value==user.getGroupName()) {
@@ -150,7 +120,7 @@ public class HomeFragment extends Fragment {
 
         } catch (Exception e) {
             /* proper exception handling to be here */
-            e.printStackTrace();
+          /*  e.printStackTrace();
         }
 
         return;
@@ -195,5 +165,5 @@ public class right{
         this.row = row;
         this.count = count;
     }
-}
+}*/
 }
