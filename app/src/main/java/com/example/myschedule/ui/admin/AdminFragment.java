@@ -155,7 +155,6 @@ public class AdminFragment extends Fragment {
                             @Override
                             public void onClick(View v) {
                                 count=0;
-                                //us.clear(users);
                                 users=mDBHelper.getAllUser();
                                 edtIdUser.setText(""+ users[count].getIdUser());
                                 edtFio.setText(users[count].getFIO());
