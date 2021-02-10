@@ -390,7 +390,7 @@ public NavController getNavController(){
      * An asynchronous task that handles the Google Sheets API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
      */
-    private class MakeRequestTask extends AsyncTask<Void, Void, Subject[]> implements com.example.myschedule.MakeRequestTask {
+    private class MakeRequestTask extends AsyncTask<Void, Void, Subject[]> {
         private com.google.api.services.sheets.v4.Sheets mService = null;
         private Exception mLastError = null;
 
