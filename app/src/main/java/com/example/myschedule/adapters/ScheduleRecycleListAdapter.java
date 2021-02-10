@@ -19,13 +19,20 @@ import com.example.myschedule.data.RecyclerViewScheduleHolder;
 import com.example.myschedule.data.Schedule;
 import com.example.myschedule.data.Subject;
 
+import java.util.ArrayList;
+
 public class ScheduleRecycleListAdapter extends RecyclerView.Adapter<RecyclerViewScheduleHolder> {
 
     private Subject[] subjects;
     private Context context;
+    private ArrayList<Subject> sbj;
 
     public ScheduleRecycleListAdapter(Subject[] subjects) {
         this.subjects = subjects;
+    }
+
+    public ScheduleRecycleListAdapter(ArrayList<Subject> subjects) {
+        this.sbj = subjects;
     }
 
     public ScheduleRecycleListAdapter(Subject[] subjects, Context context) {
@@ -47,10 +54,15 @@ public class ScheduleRecycleListAdapter extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewScheduleHolder holder, int position) {
-        holder.getTxtTime().setText(String.valueOf(subjects[position].getTime()));
-        holder.getTxtCab().setText(String.valueOf(subjects[position].getCab()+" кб"));
-        holder.getTxtSubject().setText(String.valueOf(subjects[position].getSubjectName()));
-        holder.getTxtComm().setText(String.valueOf(subjects[position].getComm()));
+        if(subjects!=null) {
+            holder.getTxtTime().setText(String.valueOf(subjects[position].getTime()));
+            if(subjects[position].getCab()=="")
+                holder.getTxtCab().setText(String.valueOf(subjects[position].getCab() + "--"));
+            else
+            holder.getTxtCab().setText(String.valueOf(subjects[position].getCab() + " кб"));
+            holder.getTxtSubject().setText(String.valueOf(subjects[position].getSubjectName()));
+            holder.getTxtComm().setText(String.valueOf(subjects[position].getComm()));
+        }
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -92,6 +104,7 @@ public class ScheduleRecycleListAdapter extends RecyclerView.Adapter<RecyclerVie
                 return false;
             }
         });
+
     }
 
     @Override

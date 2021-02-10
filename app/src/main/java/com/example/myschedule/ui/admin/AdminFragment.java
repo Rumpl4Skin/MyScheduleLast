@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,9 @@ import com.example.myschedule.R;
 import com.example.myschedule.data.Admins;
 import com.example.myschedule.data.model.LoggedInUser;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -273,7 +276,10 @@ public class AdminFragment extends Fragment {
                         edtIdUser.setText(""+ admins[count].getId_admins());
                         edtFio.setText(admins[count].getFio());
                         edtMail.setText(admins[count].getDiljn());
+                        if(admins[count].getImg()!=null)
                         setImgAdmins(admins[count].getImg());
+                        else
+                            imgAdmins.setImageResource(R.drawable.ic_menu_gallery);
 
                         imgAdmins.setVisibility(View.VISIBLE);
                         edtPsw.setVisibility(View.GONE);
@@ -634,7 +640,30 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                          imageUri = imageReturnedIntent.getData();
                         final InputStream imageStream = getActivity().getContentResolver().openInputStream(imageUri);
                         final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                        imgAdmins.setImageBitmap(selectedImage);
+                        File outFile=null;
+                        FileOutputStream out = null;
+                        File storage = getActivity().getDataDir();
+                        try {
+
+                            File dir = new File(storage.getPath());
+                            dir.mkdirs();
+                            outFile = new File(dir, admins[count].getId_admins()+"_.jpg");
+
+                            out = new FileOutputStream(outFile);
+                            selectedImage.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+                            // PNG is a lossless format, the compression factor (100) is ignored
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            try {
+                                if (out != null) {
+                                    out.close();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        imgAdmins.setImageURI(Uri.parse(storage.getPath()+admins[count].getId_admins()+"_.jpg"));
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }

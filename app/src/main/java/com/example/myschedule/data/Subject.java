@@ -33,6 +33,7 @@ public class Subject {
         this.cab = cab;
     }
 
+
     public String getComm() {
         return comm;
     }
