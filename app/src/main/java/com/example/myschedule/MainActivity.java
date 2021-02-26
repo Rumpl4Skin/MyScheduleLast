@@ -4,6 +4,7 @@ import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +41,8 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -80,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
-
         mDBHelper = new DbHelper(this);
 
         try {
@@ -110,33 +113,55 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         NavigationView navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
+        final ConstraintLayout content = findViewById(R.id.content);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string
+                .navigation_drawer_close) {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                super.onDrawerSlide(drawerView, slideOffset);
+                InputMethodManager imm = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(drawerView.getWindowToken(), 0);
+                float slideX = drawerView.getWidth() * slideOffset;
+                content.setTranslationX(slideX);
 
+                // а также меняем размер
+                //content.setScaleX(1 - slideOffset);
+                //content.setScaleY(1 - slideOffset);
+            }
+        };
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+
+        //get data from login
         Bundle arguments = getIntent().getExtras();
         if(arguments!=null){
             String  s =arguments.get("user").toString();
             user=new LoggedInUser(mDBHelper.getUser( arguments.get("user").toString()));
             View header=navigationView.getHeaderView(0);
+
             TextView user_fio=(TextView) header.findViewById(R.id.user_fio);
             TextView user_mail=(TextView) header.findViewById(R.id.user_mail);
             user_fio.setText(user.getFIO());
             user_mail.setText(user.getMail());
         }
-        if(user.getMail().toString().equals("admen@gmail.com")){
-            mAppBarConfiguration = new AppBarConfiguration.Builder(
-                    R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,R.id.nav_admen,R.id.nav_doc_detail,R.id.nav_profile)
-                    .setDrawerLayout(drawer)
-                    .build();
-        }
-        else{
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,R.id.nav_admen,R.id.nav_doc_detail,R.id.nav_profile)
                 .setDrawerLayout(drawer)
                 .build();
+        if(!user.getMail().toString().equals("admen@gmail.com")){
+            Menu menuNav = navigationView.getMenu();
+            MenuItem admin=menuNav.findItem(R.id.nav_admen);
+            admin.setVisible(false);
         }
+
+
+
+
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("Загрузка расписания ...");
 

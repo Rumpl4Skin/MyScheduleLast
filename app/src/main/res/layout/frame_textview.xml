@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="200dp"
     android:layout_margin="8dp"
-    android:background="@color/purple_200">
+    android:background="@color/purple_200"
+    android:elevation="20dp">
 
     <TextView
         android:id="@+id/fioTxt"
@@ -13,6 +14,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
+        android:elevation="25dp"
+        android:shadowRadius="2"
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -47,6 +50,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
+        android:elevation="25dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

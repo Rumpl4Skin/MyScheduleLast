@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:background="@color/purple_200">
+    android:background="@color/purple_200"
+    android:elevation="25dp">
 
     <TextView
         android:id="@+id/docs_name"
