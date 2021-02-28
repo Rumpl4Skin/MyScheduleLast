@@ -13,17 +13,22 @@ public class RecyclerViewHolder extends RecyclerView.ViewHolder {
 
     private TextView Fio;
     private TextView Doljn;
+    private TextView Phone;
     private ImageView Img;
     public RecyclerViewHolder(@NonNull View itemView) {
         super(itemView);
         Fio = itemView.findViewById(R.id.fioTxt);
         Doljn = itemView.findViewById(R.id.doljnTxt);
+        Phone = itemView.findViewById(R.id.phone);
         Img = itemView.findViewById(R.id.admin_img);
 
     }
 
     public TextView getFioView(){
         return Fio;
+    }
+    public TextView getPhoneView(){
+        return Phone;
     }
     public TextView getDoljnView(){
         return Doljn;

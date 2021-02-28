@@ -44,6 +44,7 @@ public class AdminRecycleListAdapter extends RecyclerView.Adapter<RecyclerViewHo
     public void onBindViewHolder(@NonNull RecyclerViewHolder holder, int position) {
         holder.getDoljnView().setText(String.valueOf(admins[position].getDiljn()));
         holder.getFioView().setText(String.valueOf(admins[position].getFio()));
+        holder.getPhoneView().setText(String.valueOf(admins[position].getPhone()));
         InputStream inputStream = null;
         try{
             inputStream = context.getApplicationContext().getAssets().open(admins[position].getImg());

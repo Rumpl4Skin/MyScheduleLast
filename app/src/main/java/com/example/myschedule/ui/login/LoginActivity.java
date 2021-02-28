@@ -15,11 +15,16 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -31,6 +36,10 @@ import com.example.myschedule.R;
 import com.example.myschedule.data.model.LoggedInUser;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import static java.security.AccessController.getContext;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -39,6 +48,7 @@ public class LoginActivity extends AppCompatActivity {
     private DbHelper mDBHelper;
     private SQLiteDatabase mDb;
     public EditText usernameEditText;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,11 +72,18 @@ public class LoginActivity extends AppCompatActivity {
 
         usernameEditText = findViewById(R.id.mail);
         final EditText passwordEditText = findViewById(R.id.password);
-        final EditText groupEditText = findViewById(R.id.id_group);
+        final AutoCompleteTextView groupEditText = findViewById(R.id.group);
         final EditText fioEditText = findViewById(R.id.user_fio);
         final Button loginButton = findViewById(R.id.login);
         final Button registrButton = findViewById(R.id.registr);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
+        final CheckBox checkBox = findViewById(R.id.checkPass);
+
+        List<String> namesList = Arrays.asList(mDBHelper.getAllGroupName());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, namesList);
+        groupEditText.setAdapter(adapter);
+        groupEditText.setThreshold(1);
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
@@ -173,12 +190,24 @@ public class LoginActivity extends AppCompatActivity {
                                     usernameEditText.getText().toString(),
                                 passwordEditText.getText().toString(),
                                 groupEditText.getText().toString()));
-                        Toast.makeText(getApplicationContext(), "Регистрация успешна! Повторно введите пароль", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Регистрация успешна! Повторно введите пароль", Toast.LENGTH_LONG).show();
+                        registrButton.setVisibility(View.INVISIBLE);
                         passwordEditText.setText("");}
                     }
 
                 }
                     else Toast.makeText(getApplicationContext(), "Указанный пользователь существует", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                   passwordEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                } else {
+                    passwordEditText.setInputType(129);
+                }
             }
         });
     }

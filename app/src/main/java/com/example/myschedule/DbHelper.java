@@ -21,7 +21,7 @@ import java.util.List;
 
 public class DbHelper extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 8;
+    private static final int DB_VERSION = 9;
     private static final String DB_NAME = "1.sqlite";
     private static String DB_PATH = null;
     private SQLiteDatabase mDataBase;
@@ -43,6 +43,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String ADMINS_FIO = "fio_admins";
     private static final String ADMINS_DOLJN = "doljn";
     private static final String ADMINS_IMG = "admins_img";
+    private static final String ADMINS_PHONE = "phone";
 
     private static final String TABLE_DOCS = "Docs";
     private static final String ID_DOC = "id_doc";
@@ -310,7 +311,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     final public Admins[] getAllAdmins() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_ADMINS,new String[] {ID_ADMINS,ADMINS_FIO,ADMINS_DOLJN,ADMINS_IMG}, null,
+        Cursor cursor = db.query(TABLE_ADMINS,new String[] {ID_ADMINS,ADMINS_FIO,ADMINS_DOLJN,ADMINS_IMG,ADMINS_PHONE}, null,
                 null,
                 null, null, null);
         cursor.moveToFirst();
@@ -320,8 +321,8 @@ public class DbHelper extends SQLiteOpenHelper {
                     cursor.getInt(0),
                     cursor.getString(1),
                     cursor.getString(2),
-                    cursor.getString(3)
-
+                    cursor.getString(3),
+                    cursor.getString(4)
             );
             admins[i]=new Admins(admin);
             cursor.moveToNext();
