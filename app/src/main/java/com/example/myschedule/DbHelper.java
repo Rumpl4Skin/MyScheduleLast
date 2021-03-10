@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.myschedule.data.Admins;
 import com.example.myschedule.data.Docs;
+import com.example.myschedule.data.Subject;
 import com.example.myschedule.data.model.LoggedInUser;
 
 import java.io.File;
@@ -307,7 +308,27 @@ public class DbHelper extends SQLiteOpenHelper {
         return users;
     }
 
-
+   /* final public Subject[] getAllDisc() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.query(TABLE_ADMINS,new String[] {ID_ADMINS,ADMINS_FIO,ADMINS_DOLJN,ADMINS_IMG,ADMINS_PHONE}, null,
+                null,
+                null, null, null);
+        cursor.moveToFirst();
+        Subject[] subjects=new Subject[cursor.getCount()];
+        for(int i =0;i<cursor.getCount();i++){
+            Subject subject=new Subject(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getString(4)
+            );
+            subjects[i]=new Subject(subject);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return admins;
+    }*/
 
     final public Admins[] getAllAdmins() {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -350,27 +371,7 @@ public class DbHelper extends SQLiteOpenHelper {
         cursor.close();
         return docs;
     }
-    /*final public Admins[] getAllAdmins() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_ADMINS,new String[] {ID_ADMINS,ADMINS_FIO,ADMINS_DOLJN,ADMINS_IMG,ADMINS_PHONE}, null,
-                null,
-                null, null, null);
-        cursor.moveToFirst();
-        Admins[] admins=new Admins[cursor.getCount()];
-        for(int i =0;i<cursor.getCount();i++){
-            Admins admin=new Admins(
-                    cursor.getInt(0),
-                    cursor.getString(1),
-                    cursor.getString(2),
-                    cursor.getString(3),
-                    cursor.getString(4)
-            );
-            admins[i]=new Admins(admin);
-            cursor.moveToNext();
-        }
-        cursor.close();
-        return admins;
-    }*/
+
     public void userUpdate(LoggedInUser user,LoggedInUser new_user) {
         SQLiteDatabase db = this.getWritableDatabase();
 
