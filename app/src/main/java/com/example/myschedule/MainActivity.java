@@ -44,6 +44,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.ListFragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -60,7 +61,7 @@ import java.util.List;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks{
+public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks,HomeFragment.OnFragmentSendDataListener{
 
     private AppBarConfiguration mAppBarConfiguration;
     private static final String DEBUG_TAG = "HttpExample";
@@ -124,10 +125,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 imm.hideSoftInputFromWindow(drawerView.getWindowToken(), 0);
                 float slideX = drawerView.getWidth() * slideOffset;
                 content.setTranslationX(slideX);
-
-                // а также меняем размер
-                //content.setScaleX(1 - slideOffset);
-                //content.setScaleY(1 - slideOffset);
             }
         };
         drawer.addDrawerListener(toggle);
@@ -150,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,R.id.nav_admen,R.id.nav_doc_detail,R.id.nav_profile)
                 .setDrawerLayout(drawer)
                 .build();
-        if(!user.getMail().toString().equals("admen@gmail.com")){
+        if(!user.getGroupName().toString().equals("Admin Group")){
             Menu menuNav = navigationView.getMenu();
             MenuItem admin=menuNav.findItem(R.id.nav_admen);
             admin.setVisible(false);
@@ -169,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
-        getResultsFromApi();
+       // getResultsFromApi();
     }
 public NavController getNavController(){
     NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -210,7 +207,13 @@ public NavController getNavController(){
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
-
+    @Override
+    public void onSendData(Subject[] subjects) {
+        HomeFragment fragment = (HomeFragment)
+                getSupportFragmentManager().findFragmentById(R.id.nav_home);
+        if (fragment != null)
+            fragment.onSendData(subjects);
+    }
 
 
 
@@ -411,6 +414,9 @@ public NavController getNavController(){
         dialog.show();
     }
 
+
+
+
     /**
      * An asynchronous task that handles the Google Sheets API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
@@ -451,8 +457,8 @@ public NavController getNavController(){
          * @throws IOException
          */
         private Subject[] getDataFromApi() throws IOException {
-            String spreadsheetId = "1qOXcyuhXGK-Rn7WIJuovYMj4_G27_VkccgM7Jmclyls";
-            String range = "Главный корпус!C5:D18";
+            String spreadsheetId = "1XcATglqKX3IomyzjEaFv4h65B6z0wSNyIkl3Ld4omz0";
+            String range = "Числитель!C2:D12";
             ArrayList<Subject>results = new ArrayList<Subject>();
 
             ValueRange response = this.mService.spreadsheets().values()
@@ -548,17 +554,14 @@ public NavController getNavController(){
 //if you added fragment via layout xml
             HomeFragment homeFragment = (HomeFragment)
                         getSupportFragmentManager().findFragmentById(R.id.nav_home);
-                //homeFragment.setSubjects(subjects);
+            homeFragment.setAdapter(subjects);
+               // homeFragment.setSubjects(subjects);
                // homeFragment.setSubjects(output);
                 /*HomeFragment fragment = (HomeFragment) fm.findFragmentById(R.id.nav_home);
                 fragment.setSchelduleAdapter(output);
                 /*mArg.putParcelableArray("SchelduleList", (Parcelable[]) output);
                 Fragment mFrg = new HomeFragment();
                 mFrg.setArguments(mArg);*/
-                Intent intent = new Intent(getApplicationContext(), HomeFragment.class);
-// передача объекта с ключом "hello" и значением "Hello World"
-                intent.putExtra("SchelduleList", output);
-                intent.putExtra("Schl_size", output.length);
             }
         }
 

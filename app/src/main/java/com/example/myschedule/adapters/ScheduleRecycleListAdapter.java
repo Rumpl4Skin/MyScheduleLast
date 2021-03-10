@@ -27,9 +27,9 @@ public class ScheduleRecycleListAdapter extends RecyclerView.Adapter<RecyclerVie
     private Context context;
     private ArrayList<Subject> sbj;
 
-    public ScheduleRecycleListAdapter(Subject[] subjects) {
+    /*public ScheduleRecycleListAdapter(Subject[] subjects) {
         this.subjects = subjects;
-    }
+    }*/
 
     public ScheduleRecycleListAdapter(ArrayList<Subject> subjects) {
         this.sbj = subjects;

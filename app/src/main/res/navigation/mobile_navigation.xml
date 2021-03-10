@@ -46,4 +46,9 @@
         android:name="com.example.myschedule.ProfileFragment"
         android:label="@string/menu_profile"
         tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/nav_disc"
+        android:name="com.example.myschedule.ui.doc.DiscFragment"
+        android:label="@string/menu_disc"
+        tools:layout="@layout/fragment_disc" />
 </navigation>
