@@ -96,6 +96,7 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
     private static final String THU_R = "I2:J11";
     private static final String FRI_R = "K2:L11";
     boolean isBeforeFri=false;
+    int week=0;
 
     Map<Integer, String> tabs = new HashMap<Integer, String>();
 
@@ -248,6 +249,23 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
 
             case THU_R: Day= "Чт";break;
             case FRI_R: Day= "Пт";break;
+
+        }
+        return Day;
+    }
+    public int getCountDay(String name){
+
+        int Day=0;
+        switch (name){
+
+            case MON_R: Day=0 ; break;
+
+            case TUE_R: Day=1 ;break;
+
+            case WED_R: Day= 2;break;
+
+            case THU_R: Day= 3;break;
+            case FRI_R: Day= 4;break;
 
         }
         return Day;
@@ -567,8 +585,8 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
                 fin_res[i] = results.get(i);
             schedule.put(getNameDay(getCurrentDay()),fin_res);
            // tabs.put(0,getNameDay(getCurrentDay()));
-
-            for(int k=0;k<10;k++) {
+int count=getCountDay(getNameDay(getCurrentDay()));
+            for(int k=count;k<count+10;k++) {
                 if(k<4){
                     range = TABLE_NAME_CH + "!" + getDayRange(days[k]);
                 }
@@ -688,15 +706,17 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
                                 }
                                 if(!isBeforeFri)
                                 c.add(Calendar.DATE, position+1);
-                                else c.add(Calendar.DATE, position+2);
+                                else c.add(Calendar.DATE, position+2+week);
                                 NameDay = formatForDay.format(c.getTime());
                                 if(NameDay.equals("Sat")||NameDay.equals("СБ")){
                                     c.add(Calendar.DATE, 2);
                                     isBeforeFri=true;
+                                    week++;
                                 }
                                 else if(NameDay.equals("Sun")||NameDay.equals("ВС")) {
                                     c.add(Calendar.DATE, 2);
                                     isBeforeFri=true;
+                                    week++;
                                 }
                                 Day = formatForDate.format(c.getTime());
                                 tab.setText(Day/*+" "+tabs.get(position)*/);
