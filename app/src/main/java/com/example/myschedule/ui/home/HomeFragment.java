@@ -68,11 +68,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.MODE_PRIVATE;
 
 public class HomeFragment extends Fragment implements EasyPermissions.PermissionCallbacks{
     public interface OnFragmentSendDataListener {
@@ -172,7 +174,7 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
-        //getResultsFromApi();
+        getResultsFromApi();
 
 
         pager=(ViewPager2)root.findViewById(R.id.pager);
@@ -233,6 +235,10 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
             case "Thu": Day= THU_R; break;
             case "Пт": Day= FRI_R;break;
             case "Fri": Day= FRI_R; break;
+            case "Сб": Day= MON_R; break;
+            case "Sat": Day= MON_R; break;
+            case "Вс": Day= MON_R;break;
+            case "Sun": Day= MON_R; break;
         }
         return Day;
     }
@@ -295,18 +301,19 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
 
     public void setSchelduleAdapter(Subject[] subjects){
         this.subjects=subjects;
-        if(this.subjects != null){
+        if(this.subjects != null) {
             //Subject[] subjects=new Subject[arguments.getInt("Schl_size")];
-           // subjects= (Subject[]) arguments.getParcelableArray("SchelduleList");
+            // subjects= (Subject[]) arguments.getParcelableArray("SchelduleList");
             this.subjects = (Subject[]) getArguments().getParcelableArray("SchelduleList");
 
             //Subject[] subjects={new Subject("9.00-10.40","Ботаника","10 лаб","26"),
             //       new Subject("8.55-9.40","Контроль качества продукции в сфере д/о и призводства мебели","fdkjgflkgjdjdlgjfdlkgjldjglfdfgjd","26")};
 
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            recyclerView.setAdapter(new ScheduleRecycleListAdapter(subjects,getContext()));}
-        /*else*/ Toast.makeText(getActivity().getApplicationContext(), "Расписание не доступно", Toast.LENGTH_SHORT).show();
-    }
+            // recyclerView.setAdapter(new ScheduleRecycleListAdapter(subjects,getContext()));}
+            /*else*/
+            Toast.makeText(getActivity().getApplicationContext(), "Расписание не доступно", Toast.LENGTH_SHORT).show();
+        }}
 
     /**
      * Attempt to call the API, after verifying that all the preconditions are
@@ -561,8 +568,8 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
         private Map<String,Subject[]> getDataFromApi(String spreadsheetId, String table, String day) throws IOException {
             //spreadsheetId = "1XcATglqKX3IomyzjEaFv4h65B6z0wSNyIkl3Ld4omz0";
             Map<String, Subject[]> schedule = new HashMap<String, Subject[]>();
-
-            String range=getCurrentDay();
+            String range="";
+            range=getCurrentDay();
 
             ArrayList<Subject> results = new ArrayList<Subject>();
 
@@ -581,12 +588,15 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
                 }
             }
             Subject[] fin_res = new Subject[results.size()];
-            for (int i = 0; i < fin_res.length; i++)
+            for (int i = 0; i < fin_res.length; i++){
+                SharedPreferences sPref = getActivity().getSharedPreferences("Comments", MODE_PRIVATE);
+                String savedText = sPref.getString(0+"" + i, "");
                 fin_res[i] = results.get(i);
-            schedule.put(getNameDay(getCurrentDay()),fin_res);
+            }
+           // schedule.put(getNameDay(getCurrentDay()),fin_res);
            // tabs.put(0,getNameDay(getCurrentDay()));
 int count=getCountDay(getNameDay(getCurrentDay()));
-            for(int k=count;k<count+10;k++) {
+            for(int k=/*count*/0;k</*count+*/10;k++) {
                 if(k<4){
                     range = TABLE_NAME_CH + "!" + getDayRange(days[k]);
                 }
@@ -609,9 +619,20 @@ int count=getCountDay(getNameDay(getCurrentDay()));
                             results.add(new Subject(Time(i), values.get(i).get(0).toString(), "", values.get(i).get(1).toString()));
                     }
                 }
+
+                //Toast.makeText(this, "Text loaded", Toast.LENGTH_SHORT).show();
                 fin_res = new Subject[results.size()];
-                for (int i = 0; i < fin_res.length; i++)
+                for (int i = 0; i < fin_res.length; i++){
                     fin_res[i] = results.get(i);
+
+                }
+                if(!getActivity().getSharedPreferences("Comments", MODE_PRIVATE).equals(null)){
+                    for(int i = 0; i < fin_res.length; i++) {
+                        SharedPreferences sPref = getActivity().getSharedPreferences("Comments", MODE_PRIVATE);
+                        String savedText = sPref.getString(k+"" + i, "");
+                        fin_res[i].setComm(savedText);
+                    }
+                }
                 schedule.put(days[k],fin_res);
             }
             return schedule;

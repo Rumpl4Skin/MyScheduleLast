@@ -2,6 +2,7 @@ package com.example.myschedule.adapters;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +22,14 @@ import com.example.myschedule.data.Subject;
 
 import java.util.ArrayList;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class ScheduleRecycleListAdapter extends RecyclerView.Adapter<RecyclerViewScheduleHolder> {
 
     private Subject[] subjects;
     private Context context;
     private ArrayList<Subject> sbj;
+    private int count;
 
     /*public ScheduleRecycleListAdapter(Subject[] subjects) {
         this.subjects = subjects;
@@ -35,9 +39,10 @@ public class ScheduleRecycleListAdapter extends RecyclerView.Adapter<RecyclerVie
         this.sbj = subjects;
     }
 
-    public ScheduleRecycleListAdapter(Subject[] subjects, Context context) {
+    public ScheduleRecycleListAdapter(Subject[] subjects,int count, Context context) {
         this.subjects = subjects;
         this.context = context;
+        this.count=count;
     }
 
     @Override
@@ -87,6 +92,10 @@ public class ScheduleRecycleListAdapter extends RecyclerView.Adapter<RecyclerVie
                                     public void onClick(DialogInterface dialog,int id) {
                                         //Вводим текст и отображаем в строке ввода на основном экране:
                                         holder.getTxtComm().setText(userInput.getText());
+                                        SharedPreferences  sPref = context.getSharedPreferences("Comments", MODE_PRIVATE);
+                                        SharedPreferences.Editor ed = sPref.edit();
+                                        ed.putString(count++ +""+position, userInput.getText().toString());
+                                        ed.commit();
                                     }
                                 })
                         .setNegativeButton("Отмена",
