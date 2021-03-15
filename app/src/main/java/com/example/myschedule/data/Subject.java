@@ -15,6 +15,8 @@ public class Subject {
         this.time = s.getTime();
         this.subjectName = s.getSubjectName();
         this.cab = s.getCab();
+        this.lab_count=s.getLab_count();
+        this.pract_count=s.getPract_count();
     }
     public Subject(int id_subject, String time, String subjectName, String comm, String cab, int lab_count, int pract_count) {
         this.id_subject = id_subject;
@@ -32,7 +34,12 @@ public class Subject {
         this.comm = comm;
         this.cab = cab;
     }
-
+    public Subject(int id_subject, String subjectName,int lab_count,int pract_count) {
+        this.id_subject = id_subject;
+        this.subjectName = subjectName;
+        this.lab_count = lab_count;
+        this.pract_count = pract_count;
+    }
 
     public String getComm() {
         return comm;

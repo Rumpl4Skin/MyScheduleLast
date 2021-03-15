@@ -44,6 +44,7 @@ import com.example.myschedule.utils.PageAdapter;
 import com.gigamole.navigationtabstrip.NavigationTabStrip;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -99,6 +100,7 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
     private static final String FRI_R = "K2:L11";
     boolean isBeforeFri=false;
     int week=0;
+    String change="";
 
     Map<Integer, String> tabs = new HashMap<Integer, String>();
 
@@ -568,8 +570,8 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
         private Map<String,Subject[]> getDataFromApi(String spreadsheetId, String table, String day) throws IOException {
             //spreadsheetId = "1XcATglqKX3IomyzjEaFv4h65B6z0wSNyIkl3Ld4omz0";
             Map<String, Subject[]> schedule = new HashMap<String, Subject[]>();
-            String range="";
-            range=getCurrentDay();
+            String range="B14";
+
 
             ArrayList<Subject> results = new ArrayList<Subject>();
 
@@ -581,20 +583,14 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
             if (values != null) {
                 for (int i = 0; i < values.size(); i++) {
 
-                    if (values.get(i).size() == 1)
-                        results.add(new Subject(Time(i), values.get(i).get(0).toString(), "", ""));
-                    else if (values.get(i).size() == 2)
-                        results.add(new Subject(Time(i), values.get(i).get(0).toString(), "", values.get(i).get(1).toString()));
+                    if (values.get(i).size() == 1){
+                       change=values.get(i).get(0).toString();
+                    }
+                    else if(values.get(i).size() == 0)
+                        change="";
                 }
             }
-            Subject[] fin_res = new Subject[results.size()];
-            for (int i = 0; i < fin_res.length; i++){
-                SharedPreferences sPref = getActivity().getSharedPreferences("Comments", MODE_PRIVATE);
-                String savedText = sPref.getString(0+"" + i, "");
-                fin_res[i] = results.get(i);
-            }
-           // schedule.put(getNameDay(getCurrentDay()),fin_res);
-           // tabs.put(0,getNameDay(getCurrentDay()));
+
 int count=getCountDay(getNameDay(getCurrentDay()));
             for(int k=/*count*/0;k</*count+*/10;k++) {
                 if(k<4){
@@ -621,7 +617,7 @@ int count=getCountDay(getNameDay(getCurrentDay()));
                 }
 
                 //Toast.makeText(this, "Text loaded", Toast.LENGTH_SHORT).show();
-                fin_res = new Subject[results.size()];
+                Subject[] fin_res = new Subject[results.size()];
                 for (int i = 0; i < fin_res.length; i++){
                     fin_res[i] = results.get(i);
 
@@ -743,6 +739,9 @@ int count=getCountDay(getNameDay(getCurrentDay()));
                                 tab.setText(Day/*+" "+tabs.get(position)*/);
                             }
                         }).attach();
+                if(change!="")
+                Snackbar.make(getView(),"Расписание изменено для: "+change, Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         }
 
