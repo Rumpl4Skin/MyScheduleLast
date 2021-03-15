@@ -64,6 +64,12 @@ public class AdminFragment extends Fragment {
     private static final String ADMINS_DOLJN = "doljn";
     private static final String ADMINS_IMG = "admins_img";
 
+    private static final String TABLE_DOCS = "Docs";
+    private static final String ID_DOC = "id_doc";
+    private static final String DOC_NAME = "name_doc";
+    private static final String DOC_IMG = "doc_img";
+
+
     private static final String TABLE_GROUPS = "groups";
     private static final String GROUP_NAME = "group_name";
      Uri imageUri= Uri.parse("");
@@ -455,22 +461,20 @@ public class AdminFragment extends Fragment {
                                 count--;
                             }
                         });
-                        /*btnApply.setOnClickListener(new View.OnClickListener() {
+                        btnApply.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
 
                                 ContentValues newValues = new ContentValues();
 // Задайте значения для каждой строки.
-                                if(mDBHelper.adminIsExistAny(admins[count])){
-                                    newValues.put(ADMINS_FIO,  edtFio.getText().toString());
-                                    newValues.put(ADMINS_DOLJN,  edtMail.getText().toString());
-                                    newValues.put(ADMINS_IMG,  admins[count].getImg());
-                                    mDb.update (TABLE_ADMINS, newValues, ID_ADMINS+"="+edtIdUser.getText().toString(), null);
-                                }
+                                    newValues.put(DOC_NAME,  edtFio.getText().toString());
+                                    newValues.put(DOC_IMG,  docs[count].getImg());
+                                    mDb.update (TABLE_DOCS, newValues, ID_DOC+"="+edtIdUser.getText().toString(), null);
+
                                 Toast.makeText(getContext(), "Запись отредактирована!", Toast.LENGTH_SHORT).show();
-                                updateAdminsUI();
+                                updateDocsUI();
                             }
-                        });*/
+                        });
                         btnAdd.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -485,15 +489,14 @@ public class AdminFragment extends Fragment {
                                     Toast.makeText(getContext(), "Не все поля заполнены или администрация с таким именем существует", Toast.LENGTH_LONG).show();
                                 else {
 
-                                    newValues.put(ADMINS_FIO, edtFio.getText().toString());
-                                    newValues.put(ADMINS_DOLJN, edtMail.getText().toString());
-                                    newValues.put(ADMINS_IMG, imageUri.toString());
+                                    newValues.put(DOC_NAME, edtFio.getText().toString());
+                                    newValues.put(DOC_IMG, imageUri.toString());
 
 // Добавление в бд
                                     mDb.insert("Docs", null, newValues);
                                     count++;
                                     Toast.makeText(getContext(), "Запись добавлена!", Toast.LENGTH_SHORT).show();
-                                    updateUsersUI();
+                                    updateDocsUI();
                                     is_edit=false;
                                 }
                             }
@@ -811,6 +814,14 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtMail.setText(admins[count].getDiljn());
         setImgAdmins(admins[count].getImg());
     }
+    public void updateDocsUI(){
+        count=0;
+        //adm.clear(admins);
+        docs=mDBHelper.getAllDocs();
+        edtIdUser.setText(""+ docs[count].getId_doc());
+        edtFio.setText(docs[count].getName());
+        setImgAdmins(docs[count].getImg());
+    }
     public void setModeAdmin(){
 
         count=0;
@@ -864,7 +875,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         imgAdmins.setVisibility(View.GONE);
         edtPsw.setVisibility(View.GONE);
         edtIdGroup.setVisibility(View.GONE);
-        edtGroupName.setVisibility(View.VISIBLE);
+        edtGroupName.setVisibility(View.GONE);
 
         count=0;
 //        us.clear(users);
