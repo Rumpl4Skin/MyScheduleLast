@@ -93,8 +93,10 @@ public class ScheduleRecycleListAdapter extends RecyclerView.Adapter<RecyclerVie
                                         //Вводим текст и отображаем в строке ввода на основном экране:
                                         holder.getTxtComm().setText(userInput.getText());
                                         SharedPreferences  sPref = context.getSharedPreferences("Comments", MODE_PRIVATE);
+                                        SharedPreferences  sPrefid = context.getSharedPreferences("MainActivity",MODE_PRIVATE);
+
                                         SharedPreferences.Editor ed = sPref.edit();
-                                        ed.putString(count++ +""+position, userInput.getText().toString());
+                                        ed.putString(count++ +""+position+""+sPrefid.getString("group",""), userInput.getText().toString());
                                         ed.commit();
                                     }
                                 })

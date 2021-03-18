@@ -16,10 +16,10 @@ public final ImageView handleView;
 
 public RecyclerViewScheduleHolderAdm(@NonNull View itemView) {
         super(itemView);
-        txtTime = itemView.findViewById(R.id.txtTime);
-        txtSubject = itemView.findViewById(R.id.txtSubject);
-        txtCab = itemView.findViewById(R.id.txtCab);
-        txtComm = itemView.findViewById(R.id.txtComm);
+        txtTime = itemView.findViewById(R.id.txtTimeAdm);
+        txtSubject = itemView.findViewById(R.id.txtSubjectAdm);
+        txtCab = itemView.findViewById(R.id.txtCabAdm);
+        txtComm = itemView.findViewById(R.id.txtCommAdm);
         handleView=itemView.findViewById(R.id.handle);
 
         }

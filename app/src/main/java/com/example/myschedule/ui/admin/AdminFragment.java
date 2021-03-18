@@ -1,13 +1,17 @@
 package com.example.myschedule.ui.admin;
 
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -19,35 +23,99 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.myschedule.DbHelper;
 import com.example.myschedule.R;
+import com.example.myschedule.adapters.ScheduleRecycleListAdapterAdm;
 import com.example.myschedule.data.Admins;
 import com.example.myschedule.data.Docs;
+import com.example.myschedule.data.Schedule;
 import com.example.myschedule.data.Subject;
 import com.example.myschedule.data.model.LoggedInUser;
+import com.example.myschedule.helper.ItemTouchHelperAdapter;
+import com.example.myschedule.helper.SimpleItemTouchHelperCallback;
 import com.example.myschedule.ui.OnStartDragListener;
+import com.example.myschedule.ui.home.HomeFragment;
+import com.example.myschedule.utils.PageAdapter;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.ValueRange;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.MODE_PRIVATE;
 
 public class AdminFragment extends Fragment implements
-        OnStartDragListener {
+        ScheduleRecycleListAdapterAdm.OnDragStartListener {
 
+    GoogleAccountCredential mCredential;
+    ProgressDialog mProgress;
+    static final int REQUEST_ACCOUNT_PICKER = 1000;
+    static final int REQUEST_AUTHORIZATION = 1001;
+    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+    private static final String SPREAD_SHEET_42I = "1XcATglqKX3IomyzjEaFv4h65B6z0wSNyIkl3Ld4omz0";
+    private static final String SPREAD_SHEET_32I = "1EA2JyUBb2lhhcXZM0ERjXQAH1l_OYp44zDYM4MwqTMA";
+    private static final String PREF_ACCOUNT_NAME = "accountName";
+    private static final String TABLE_NAME_CH = "Числитель";
+    private static final String TABLE_NAME_ZN = "Знаменатель";
+    private static final String MON_R = "C2:D11";
+    private static final String TUE_R = "E2:F11";
+    private static final String WED_R = "G2:H11";
+    private static final String THU_R = "I2:J11";
+    private static final String FRI_R = "K2:L11";
+    boolean isBeforeFri=false,tabsChange=false;
+    int week=0;
+    String change="";
+
+    Map<Integer, String> tabs = new HashMap<Integer, String>();
+
+    private static final String[] SCOPES = { SheetsScopes.SPREADSHEETS_READONLY };
+
+    private HomeFragment.OnFragmentSendDataListener fragmentSendDataListener;
+    private RecyclerView recyclerView;
     private DbHelper mDBHelper;
     private SQLiteDatabase mDb;
+    AutoCompleteTextView GroupName;
+    private LoggedInUser user;
+    AssetManager assetManager;
+    Map<String,Subject[]> scheldule;
+    Subject[] subjects;
+    TextView curentGroup;
+    ViewPager2 pager;
+    TabLayout tabLayout;
 
     private static final String MOD_USERS = "Редактирование пользователей";
     private static final String MOD_ADMIN = "Редактирование администрации";
@@ -97,6 +165,7 @@ public class AdminFragment extends Fragment implements
     Admins adm;
     String[] mods = { MOD_USERS, MOD_ADMIN ,MOD_ZAYV,  MOD_DISC,MOD_SCHEDULE};
     String selected_mode=MOD_USERS;
+    private ItemTouchHelper mItemTouchHelper;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         /*galleryViewModel =
@@ -119,7 +188,9 @@ public class AdminFragment extends Fragment implements
         btnAdd = root.findViewById(R.id.add);
 
         imgAdmins = root.findViewById(R.id.gallery_admins);
+        recyclerView=root.findViewById(R.id.shedule_RecListAdm);
         mDBHelper = new DbHelper(getContext());
+
 
         try {
             mDBHelper.updateDataBase();
@@ -631,8 +702,17 @@ public class AdminFragment extends Fragment implements
                             }
                         });
                         break;
-                  /*  case 4: gf
-                        break;*/
+                    case 4:
+                        subjects=new Subject[1];
+                        subjects[0]=new Subject(0,"8/00-9.45","Предмет","","16", 10,20);
+                        recyclerView.setHasFixedSize(true);
+                        ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(subjects,getContext(),AdminFragment.this::onDragStarted);
+                        recyclerView.setAdapter(adapterr);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
+                        mItemTouchHelper = new ItemTouchHelper(callback);
+                        mItemTouchHelper.attachToRecyclerView(recyclerView);
+                        break;
                 }
 
             }
@@ -781,6 +861,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtMail.setText("");
         edtPsw .setText("");
         edtIdGroup.setText("");
+        imgAdmins.setImageResource(R.drawable.ic_menu_gallery);
     }
     public boolean anyEdtEmpty(){
         if((edtFio.getVisibility()!=View.GONE &&edtFio.getText().toString().equals(""))
@@ -869,6 +950,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtIdUser.setText(""+ docs[count].getId_doc());
         edtFio.setText(docs[count].getName());
         edtIdUser.setHint(R.string.un_id);
+        edtFio.setHint("Наименование документа");
         edtMail.setVisibility(View.GONE);
         imgAdmins.setVisibility(View.VISIBLE);
         edtPsw.setVisibility(View.GONE);
@@ -978,9 +1060,12 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                 }
         }}
 
+
+
+
     @Override
-    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
-        //mItemTouchHelper.startDrag(viewHolder);
+    public void onDragStarted(RecyclerView.ViewHolder viewHolder) {
+        mItemTouchHelper.startDrag(viewHolder);
     }
 }
 

@@ -138,6 +138,11 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             user=new LoggedInUser(mDBHelper.getUser( arguments.get("user").toString()));
             View header=navigationView.getHeaderView(0);
 
+            SharedPreferences sPref = getPreferences(MODE_PRIVATE);
+            String savedText = sPref.getString("group", "");
+            SharedPreferences.Editor ed = sPref.edit();
+            ed.putString("group",user.getGroupName());
+            ed.commit();
             TextView user_fio=(TextView) header.findViewById(R.id.user_fio);
             TextView user_mail=(TextView) header.findViewById(R.id.user_mail);
             user_fio.setText(user.getFIO());

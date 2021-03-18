@@ -629,7 +629,7 @@ int count=getCountDay(getNameDay(getCurrentDay()));
                 if(!getActivity().getSharedPreferences("Comments", MODE_PRIVATE).equals(null)){
                     for(int i = 0; i < fin_res.length; i++) {
                         SharedPreferences sPref = getActivity().getSharedPreferences("Comments", MODE_PRIVATE);
-                        String savedText = sPref.getString(k+"" + i, "");
+                        String savedText = sPref.getString(k+"" + i+getActivity().getPreferences( MODE_PRIVATE).getString("group",""), "");
                         fin_res[i].setComm(savedText);
                     }
                 }

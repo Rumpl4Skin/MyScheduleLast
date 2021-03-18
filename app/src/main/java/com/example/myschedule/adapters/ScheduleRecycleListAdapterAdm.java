@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -15,41 +16,54 @@ import androidx.core.view.MotionEventCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myschedule.R;
-import com.example.myschedule.data.RecyclerViewScheduleHolder;
 import com.example.myschedule.data.RecyclerViewScheduleHolderAdm;
 import com.example.myschedule.data.Subject;
+import com.example.myschedule.helper.ItemTouchHelperAdapter;
 import com.example.myschedule.ui.OnStartDragListener;
 
 import java.util.ArrayList;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<RecyclerViewScheduleHolderAdm> {
+public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<RecyclerViewScheduleHolderAdm>implements ItemTouchHelperAdapter {
 
     private Subject[] subjects;
     private Context context;
     private ArrayList<Subject> sbj;
     private int count;
-    //private final OnStartDragListener mDragStartListener;
+    private final OnStartDragListener mDragStartListener;
+
+    @Override
+    public void onItemMove(int fromPosition, int toPosition) {
+
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+
+    }
 
     /*public ScheduleRecycleListAdapter(Subject[] subjects) {
         this.subjects = subjects;
     }*/
-
-    public ScheduleRecycleListAdapterAdm(ArrayList<Subject> subjects) {
+    public interface OnDragStartListener {
+        void onDragStarted(RecyclerView.ViewHolder viewHolder);
+    }
+    public ScheduleRecycleListAdapterAdm(ArrayList<Subject> subjects, OnStartDragListener mDragStartListener) {
         this.sbj = subjects;
+        this.mDragStartListener = mDragStartListener;
     }
 
-    public ScheduleRecycleListAdapterAdm(Subject[] subjects, int count, Context context,OnStartDragListener dragStartListener) {
+    public ScheduleRecycleListAdapterAdm(Subject[] subjects, Context context, OnStartDragListener dragStartListener) {
         this.subjects = subjects;
         this.context = context;
         this.count=count;
-      //  mDragStartListener = dragStartListener;
+        this.mDragStartListener = dragStartListener;
     }
 
     @Override
     public int getItemViewType(final int position) {
-        return R.layout.frame_schedule;
+        return R.layout.frame_schedule_adm;
     }
 
     @NonNull
@@ -95,8 +109,10 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
                                         //Вводим текст и отображаем в строке ввода на основном экране:
                                         holder.getTxtComm().setText(userInput.getText());
                                         SharedPreferences  sPref = context.getSharedPreferences("Comments", MODE_PRIVATE);
+
                                         SharedPreferences.Editor ed = sPref.edit();
-                                        ed.putString(count++ +""+position, userInput.getText().toString());
+                                        ed.putString(count++ +""+position+""+context.getSharedPreferences("MainActivity", MODE_PRIVATE)
+                                                .getString("group",""), userInput.getText().toString());
                                         ed.commit();
                                     }
                                 })
@@ -121,7 +137,7 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
             public boolean onTouch(View v, MotionEvent event) {
                 if (MotionEventCompat.getActionMasked(event) ==
                         MotionEvent.ACTION_DOWN) {
-                    //mDragStartListener.onStartDrag(holder);
+                    mDragStartListener.onStartDrag(holder);
                 }
                 return false;
             }
