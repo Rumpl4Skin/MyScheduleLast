@@ -7,17 +7,17 @@
     android:background="?android:attr/selectableItemBackground">
 
     <TextView
-        android:id="@+id/txtTime"
+        android:id="@+id/txtTimeAdm"
         android:layout_width="90dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
         android:text="Время"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtSubject" />
+        app:layout_constraintTop_toBottomOf="@+id/txtSubjectAdm" />
 
     <TextView
-        android:id="@+id/txtSubject"
+        android:id="@+id/txtSubjectAdm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -25,13 +25,13 @@
         android:text="Предмет"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/txtCab"
+        app:layout_constraintBottom_toTopOf="@+id/txtCabAdm"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/txtCab"
+        android:id="@+id/txtCabAdm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -39,22 +39,35 @@
         android:layout_marginEnd="160dp"
         android:text="кабинет"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/txtTime"
-        app:layout_constraintTop_toBottomOf="@+id/txtSubject" />
+        app:layout_constraintStart_toEndOf="@+id/txtTimeAdm"
+        app:layout_constraintTop_toBottomOf="@+id/txtSubjectAdm" />
 
     <TextView
-        android:id="@+id/txtComm"
-        android:layout_width="wrap_content"
+        android:id="@+id/txtCommAdm"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
-        android:layout_marginEnd="4dp"
+        android:layout_marginEnd="26dp"
         android:layout_marginBottom="8dp"
         android:text="Комментарий"
         android:textColor="@color/purple_200"
         android:textStyle="italic"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/handle"
+        app:layout_constraintStart_toEndOf="@+id/txtCabAdm"
+        app:layout_constraintTop_toBottomOf="@+id/txtSubjectAdm" />
+
+    <ImageView
+        android:id="@+id/handle"
+        android:layout_width="?listPreferredItemHeight"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical|right"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:scaleType="center"
+        android:src="@drawable/ic_baseline_reorder_24"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/txtCab"
-        app:layout_constraintTop_toBottomOf="@+id/txtSubject" />
+        app:layout_constraintStart_toEndOf="@+id/txtCommAdm"
+        app:layout_constraintTop_toBottomOf="@+id/txtSubjectAdm" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -36,5 +36,6 @@
         app:layout_constraintHorizontal_bias="0.476"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/name_doc"
-        tools:src="@tools:sample/avatars" />
+        tools:src="@tools:sample/avatars"
+        android:background="?android:attr/selectableItemBackground"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

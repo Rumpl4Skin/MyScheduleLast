@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myschedule.DbHelper;
 import com.example.myschedule.R;
@@ -30,6 +31,7 @@ import com.example.myschedule.data.Admins;
 import com.example.myschedule.data.Docs;
 import com.example.myschedule.data.Subject;
 import com.example.myschedule.data.model.LoggedInUser;
+import com.example.myschedule.ui.OnStartDragListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,7 +43,8 @@ import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
-public class AdminFragment extends Fragment {
+public class AdminFragment extends Fragment implements
+        OnStartDragListener {
 
     private DbHelper mDBHelper;
     private SQLiteDatabase mDb;
@@ -50,6 +53,7 @@ public class AdminFragment extends Fragment {
     private static final String MOD_ADMIN = "Редактирование администрации";
     private static final String MOD_ZAYV = "Редактирование образцов заявлений";
     private static final String MOD_DISC = "Редактирование списка дисциплин";
+    private static final String MOD_SCHEDULE = "Редактирование расписания";
 
     private static final String TABLE_USERS = "users";
     private static final String ID_USER = "id_user";
@@ -62,6 +66,7 @@ public class AdminFragment extends Fragment {
     private static final String ID_ADMINS = "id_admins";
     private static final String ADMINS_FIO = "fio_admins";
     private static final String ADMINS_DOLJN = "doljn";
+    private static final String ADMINS_PHONE = "phone";
     private static final String ADMINS_IMG = "admins_img";
 
     private static final String TABLE_DOCS = "Docs";
@@ -69,6 +74,11 @@ public class AdminFragment extends Fragment {
     private static final String DOC_NAME = "name_doc";
     private static final String DOC_IMG = "doc_img";
 
+    private static final String TABLE_DISC = "subject";
+    private static final String ID_DISC = "id_subject";
+    private static final String DISC_NAME = "name_subject";
+    private static final String DISC_LAB = "lab_numb";
+    private static final String DISC_PRACT = "practic_numb";
 
     private static final String TABLE_GROUPS = "groups";
     private static final String GROUP_NAME = "group_name";
@@ -85,7 +95,7 @@ public class AdminFragment extends Fragment {
     Subject[] subj;
     LoggedInUser us;
     Admins adm;
-    String[] mods = { MOD_USERS, MOD_ADMIN ,MOD_ZAYV,  MOD_DISC};
+    String[] mods = { MOD_USERS, MOD_ADMIN ,MOD_ZAYV,  MOD_DISC,MOD_SCHEDULE};
     String selected_mode=MOD_USERS;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -286,6 +296,7 @@ public class AdminFragment extends Fragment {
                         edtIdUser.setText(""+ admins[count].getId_admins());
                         edtFio.setText(admins[count].getFio());
                         edtMail.setText(admins[count].getDiljn());
+                        edtIdGroup.setText(""+admins[count].getPhone());
                         if(admins[count].getImg()!=null)
                         setImgAdmins(admins[count].getImg());
                         else
@@ -293,7 +304,6 @@ public class AdminFragment extends Fragment {
 
                         imgAdmins.setVisibility(View.VISIBLE);
                         edtPsw.setVisibility(View.GONE);
-                        edtIdGroup.setVisibility(View.GONE);
                         edtGroupName.setVisibility(View.GONE);
 
                         btnUpdate.setOnClickListener(new View.OnClickListener() {
@@ -305,6 +315,7 @@ public class AdminFragment extends Fragment {
                                 edtIdUser.setText(""+ admins[count].getId_admins());
                                 edtFio.setText(admins[count].getFio());
                                 edtMail.setText(admins[count].getDiljn());
+                                edtIdGroup.setText(""+admins[count].getPhone());
                                 setImgAdmins(admins[count].getImg());
                                 Toast.makeText(getContext(), "Обновлено", Toast.LENGTH_SHORT).show();
                             }
@@ -318,6 +329,7 @@ public class AdminFragment extends Fragment {
                                 edtIdUser.setText(""+ admins[count].getId_admins());
                                 edtFio.setText(admins[count].getFio());
                                 edtMail.setText(admins[count].getDiljn());
+                                edtIdGroup.setText(""+admins[count].getPhone());
                                 setImgAdmins(admins[count].getImg());
                             }
                         });
@@ -330,6 +342,7 @@ public class AdminFragment extends Fragment {
                                 edtIdUser.setText(""+ admins[count].getId_admins());
                                 edtFio.setText(admins[count].getFio());
                                 edtMail.setText(admins[count].getDiljn());
+                                edtIdGroup.setText(""+admins[count].getPhone());
                                 setImgAdmins(admins[count].getImg());
                             }
                         });
@@ -353,6 +366,7 @@ public class AdminFragment extends Fragment {
                                 if(mDBHelper.adminIsExistAny(admins[count])){
                                     newValues.put(ADMINS_FIO,  edtFio.getText().toString());
                                     newValues.put(ADMINS_DOLJN,  edtMail.getText().toString());
+                                    newValues.put(ADMINS_PHONE,  edtIdGroup.getText().toString());
                                     newValues.put(ADMINS_IMG,  admins[count].getImg());
                                     mDb.update (TABLE_ADMINS, newValues, ID_ADMINS+"="+edtIdUser.getText().toString(), null);
                                 }
@@ -376,6 +390,7 @@ public class AdminFragment extends Fragment {
 
                                         newValues.put(ADMINS_FIO, edtFio.getText().toString());
                                         newValues.put(ADMINS_DOLJN, edtMail.getText().toString());
+                                        newValues.put(ADMINS_PHONE,  edtIdGroup.getText().toString());
                                         newValues.put(ADMINS_IMG, imageUri.toString());
 
 // Добавление в бд
@@ -457,7 +472,7 @@ public class AdminFragment extends Fragment {
                                         "id_doc = ?",
                                         new String[] {edtIdUser.getText().toString()});
                                 Toast.makeText(getContext(), "Запись удалена", Toast.LENGTH_SHORT).show();
-                                updateAdminsUI();
+                                updateDocsUI();
                                 count--;
                             }
                         });
@@ -478,17 +493,18 @@ public class AdminFragment extends Fragment {
                         btnAdd.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                ContentValues newValues = new ContentValues();
+
                                 if(!is_edit){
-                                    ClearAllEdtAdm();
+                                    ClearAllEdt();
                                     is_edit=true;
-                                    Toast.makeText(getContext(), "Введите данные для добавления надписи", Toast.LENGTH_SHORT).show();
+                                    edtFio.setText("");
+                                    Toast.makeText(getContext(), "Введите данные для добавления заявления", Toast.LENGTH_SHORT).show();
                                 }
 
-                                if(!anyEdtEmptyAdm()&&mDBHelper.adminIsExistWithFio(edtFio.getText().toString()))
-                                    Toast.makeText(getContext(), "Не все поля заполнены или администрация с таким именем существует", Toast.LENGTH_LONG).show();
+                                if(edtFio.getText().toString().equals(""))
+                                    Toast.makeText(getContext(), "Не все поля заполнены ", Toast.LENGTH_LONG).show();
                                 else {
-
+                                    ContentValues newValues = new ContentValues();
                                     newValues.put(DOC_NAME, edtFio.getText().toString());
                                     newValues.put(DOC_IMG, imageUri.toString());
 
@@ -513,11 +529,10 @@ public class AdminFragment extends Fragment {
                         /*if(users.length>0)
                         us.clear(users);*/
                         subj=mDBHelper.getAllSubjName_All();
-                        //edtIdUser.setText(""+ users[count].getIdUser());
+                        edtIdUser.setText(""+ subj[count].getId_subject());
                         edtFio.setText(subj[count].getSubjectName());
                         edtMail.setText(""+subj[count].getLab_count());
-                        edtPsw .setText(""+subj[count].getPract_count());
-                        edtIdGroup.setText(""+ subj[count].getId_subject());
+                        edtIdGroup.setText(""+ subj[count].getPract_count());
 
 
 
@@ -529,9 +544,8 @@ public class AdminFragment extends Fragment {
                                 subj=mDBHelper.getAllSubjName_All();
                                 edtIdUser.setText(""+ subj[count].getId_subject());
                                 edtFio.setText(subj[count].getSubjectName());
-                                edtMail.setText(subj[count].getLab_count());
-                                edtPsw .setText(subj[count].getPract_count());
-                                edtIdGroup.setText(""+ users[count].getIdGroup());
+                                edtMail.setText(""+subj[count].getLab_count());
+                                edtIdGroup.setText(""+ subj[count].getPract_count());
                                 Toast.makeText(getContext(), "Обновлено", Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -544,8 +558,7 @@ public class AdminFragment extends Fragment {
                                 edtIdUser.setText(""+ subj[count].getId_subject());
                                 edtFio.setText(subj[count].getSubjectName());
                                 edtMail.setText(""+subj[count].getLab_count());
-                                edtPsw .setText(""+subj[count].getPract_count());
-                                edtIdGroup.setText(""+ subj[count].getId_subject());
+                                edtIdGroup.setText(""+ subj[count].getPract_count());
                             }
                         });
                         btnNext.setOnClickListener(new View.OnClickListener() {
@@ -557,18 +570,17 @@ public class AdminFragment extends Fragment {
                                 edtIdUser.setText(""+ subj[count].getId_subject());
                                 edtFio.setText(subj[count].getSubjectName());
                                 edtMail.setText(""+subj[count].getLab_count());
-                                edtPsw .setText(""+subj[count].getPract_count());
-                                edtIdGroup.setText(""+ subj[count].getId_subject());
+                                edtIdGroup.setText(""+ subj[count].getPract_count());
                             }
                         });
                         btnDel.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                mDb.delete("subject",
-                                        "id_subject = ?",
+                                mDb.delete(TABLE_DISC,
+                                        ID_DISC+" = ?",
                                         new String[] {edtIdUser.getText().toString()});
                                 Toast.makeText(getContext(), "Запись удалена", Toast.LENGTH_SHORT).show();
-                                updateUsersUI();
+                                updateSubjectUI();
                                 count--;
                             }
                         });
@@ -578,15 +590,15 @@ public class AdminFragment extends Fragment {
 
                                 ContentValues newValues = new ContentValues();
 // Задайте значения для каждой строки.
-                                if(mDBHelper.userIsExistAny(users[count])){
-                                    newValues.put(USER_FIO,  edtFio.getText().toString());
-                                    newValues.put(MAIL,  edtMail.getText().toString());
-                                    newValues.put(PASSWORD,  edtPsw.getText().toString());
-                                    newValues.put(ID_GROUP,  mDBHelper.getGroupId(edtGroupName.getText().toString()));
-                                    mDb.update (TABLE_USERS, newValues, ID_USER+"="+mDBHelper.getGroupId(edtGroupName.getText().toString()), null);
-                                }
+
+                                    newValues.put(ID_DISC,  edtIdUser.getText().toString());
+                                    newValues.put(DISC_NAME,  edtFio.getText().toString());
+                                    newValues.put(DISC_LAB,  edtMail.getText().toString());
+                                    newValues.put(DISC_PRACT, edtIdGroup.getText().toString());
+                                    mDb.update (TABLE_DISC, newValues, ID_DISC+"="+edtIdUser.getText().toString(), null);
+
                                 Toast.makeText(getContext(), "Запись отредактирована!", Toast.LENGTH_SHORT).show();
-                                updateUsersUI();
+                                updateSubjectUI();
                             }
                         });
                         btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -594,35 +606,33 @@ public class AdminFragment extends Fragment {
                             public void onClick(View v) {
                                 ContentValues newValues = new ContentValues();
                                 if(!is_edit){
-                                    ClearAllEdt();
+                                    edtIdUser.setText("");
+                                    edtFio.setText("");
+                                    edtMail.setText("");
+                                    edtIdGroup.setText("");
                                     is_edit=true;
                                     Toast.makeText(getContext(), "Введите данные для добавления надписи", Toast.LENGTH_SHORT).show();
                                 }
 
-                                if(!anyEdtEmpty()&&mDBHelper.userIsExistWithMail(edtMail.getText().toString()))
-                                    Toast.makeText(getContext(), "Не все поля заполнены или пользователь с такой почтой зарегистрирован", Toast.LENGTH_LONG).show();
+                                if((edtFio.getText().toString().equals(""))
+                                        ||edtMail.getText().toString().equals(""))
+                                    Toast.makeText(getContext(), "Не все поля заполнены ", Toast.LENGTH_LONG).show();
                                 else {
-                                    if(edtPsw.getText().toString().length()<8)
-                                        Toast.makeText(getContext(), "Пароль должен быть длинне 8-ми символов", Toast.LENGTH_LONG).show();
-                                    else {
-                                        newValues.put(USER_FIO, edtFio.getText().toString());
-                                        newValues.put(MAIL, edtMail.getText().toString());
-                                        newValues.put(PASSWORD, edtPsw.getText().toString());
-                                        newValues.put(ID_GROUP, mDBHelper.getGroupId(edtGroupName.getText().toString()));
-
-
-
+                                        newValues.put(DISC_NAME, edtFio.getText().toString());
+                                        newValues.put(DISC_LAB, edtMail.getText().toString());
+                                        newValues.put(DISC_PRACT, edtIdGroup.getText().toString());
 // Добавление в бд
-                                        mDb.insert(TABLE_USERS, null, newValues);
+                                        mDb.insert(TABLE_DISC, null, newValues);
                                         count++;
                                         Toast.makeText(getContext(), "Запись добавлена!", Toast.LENGTH_SHORT).show();
-                                        updateUsersUI();
+                                        updateSubjectUI();
                                         is_edit=false;
-                                    }
                                 }
                             }
                         });
                         break;
+                  /*  case 4: gf
+                        break;*/
                 }
 
             }
@@ -773,16 +783,16 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtIdGroup.setText("");
     }
     public boolean anyEdtEmpty(){
-        if(edtFio.getText().toString()==""
-                ||edtMail.getText().toString()==""
-                ||edtPsw.getText().toString()==""
-                ||edtGroupName.getText().toString()=="")
+        if((edtFio.getVisibility()!=View.GONE &&edtFio.getText().toString().equals(""))
+                ||(edtMail.getVisibility()!=View.GONE &&edtMail.getText().toString().equals(""))
+                ||(edtPsw.getVisibility()!=View.GONE &&edtPsw.getText().toString().equals(""))
+                ||(edtGroupName.getVisibility()!=View.GONE &&edtGroupName.getText().equals("")))
         return true;
         else return false;
     }
     public boolean anyEdtEmptyAdm(){
-        if(edtFio.getText().toString()==""
-                ||edtMail.getText().toString()=="")
+        if(edtFio.getText().toString().equals("")
+                ||edtMail.getText().toString().equals(""))
             return true;
         else return false;
     }
@@ -793,6 +803,15 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                 &&edtGroupName.getText().toString()=="")
             return true;
         else return false;
+    }
+    public void updateSubjectUI(){
+        count=0;
+//        us.clear(users);
+        subj=mDBHelper.getAllSubjName_All();
+        edtIdUser.setText(""+ subj[count].getId_subject());
+        edtFio.setText(subj[count].getSubjectName());
+        edtMail.setText(""+subj[count].getLab_count());
+        edtIdGroup.setText(""+subj[count].getPract_count());
     }
     public void updateUsersUI(){
         count=0;
@@ -833,10 +852,13 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtMail.setText(admins[count].getDiljn());
         edtMail.setHint(R.string.admin_doljn);
         edtFio.setHint(R.string.un_fio);
+        edtIdGroup.setVisibility(View.VISIBLE);
+        edtMail.setText(""+admins[count].getPhone());
+        edtIdGroup.setHint("Телефон");
 
         imgAdmins.setVisibility(View.VISIBLE);
         edtPsw.setVisibility(View.GONE);
-        edtIdGroup.setVisibility(View.GONE);
+
         edtGroupName.setVisibility(View.GONE);
     }
     public void setModeZayvl(){
@@ -874,18 +896,22 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
 
         imgAdmins.setVisibility(View.GONE);
         edtPsw.setVisibility(View.GONE);
-        edtIdGroup.setVisibility(View.GONE);
+        edtIdGroup.setVisibility(View.VISIBLE);
         edtGroupName.setVisibility(View.GONE);
+        edtMail.setVisibility(View.VISIBLE);
 
         count=0;
 //        us.clear(users);
         subj=mDBHelper.getAllSubjName_All();
         edtIdUser.setText(""+ subj[count].getId_subject());
         edtFio.setText(subj[count].getSubjectName());
+        edtFio.setHint("Название предмета");
         edtIdUser.setHint(R.string.un_id);
         edtMail.setText(""+subj[count].getLab_count());
-        edtMail.setHint(R.string.prompt_email);
-        edtFio.setHint(R.string.un_fio);
+        edtMail.setHint("Количество лабораторных");
+        edtIdGroup.setText(""+subj[count].getPract_count());
+        edtIdGroup.setHint("Количество практических");
+
     }
     public void setImgAdmins(String pathImg){
         InputStream inputStream = null;
@@ -950,6 +976,12 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                         e.printStackTrace();
                     }
                 }
-        }}}
+        }}
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        //mItemTouchHelper.startDrag(viewHolder);
+    }
+}
 
 

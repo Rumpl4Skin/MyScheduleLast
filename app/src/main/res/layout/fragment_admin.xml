@@ -18,209 +18,181 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <Spinner
-                android:id="@+id/sp_mode"
-                android:layout_width="363dp"
+
+            <LinearLayout
+                android:id="@+id/content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="24dp"
+                android:orientation="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/prev"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:foregroundGravity="bottom"
-                android:src="@drawable/ic_baseline_arrow_left_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/update"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/group_namesHome" />
+                <Spinner
+                    android:id="@+id/sp_mode"
+                    android:layout_width="363dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="24dp" />
 
-            <ImageView
-                android:id="@+id/update"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:foregroundGravity="bottom"
-                android:src="@drawable/ic_baseline_replay_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/delete"
-                app:layout_constraintStart_toEndOf="@+id/prev"
-                app:layout_constraintTop_toBottomOf="@+id/group_namesHome" />
+                <EditText
+                    android:id="@+id/id_user"
+                    android:layout_width="363dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="24dp"
+                    android:editable="false"
+                    android:enabled="false"
+                    android:hint="Users id"
+                    android:inputType="number"
+                    android:selectAllOnFocus="true" />
 
-            <ImageView
-                android:id="@+id/next"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:foregroundGravity="bottom"
-                android:src="@drawable/ic_baseline_arrow_right_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/apply"
-                app:layout_constraintTop_toBottomOf="@+id/group_namesHome" />
+                <EditText
+                    android:id="@+id/fio"
+                    android:layout_width="363dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="24dp"
+                    android:hint="FIO"
+                    android:inputType="text"
+                    android:selectAllOnFocus="true" />
 
-            <ImageView
-                android:id="@+id/delete"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:foregroundGravity="bottom"
-                android:src="@drawable/ic_baseline_delete_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/add"
-                app:layout_constraintStart_toEndOf="@+id/update"
-                app:layout_constraintTop_toBottomOf="@+id/group_namesHome" />
+                <EditText
+                    android:id="@+id/password"
+                    android:layout_width="363dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="24dp"
+                    android:hint="@string/prompt_password"
+                    android:imeActionLabel="@string/action_sign_in_short"
+                    android:imeOptions="actionDone"
+                    android:inputType="number"
+                    android:selectAllOnFocus="true" />
 
-            <ImageView
-                android:id="@+id/add"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:foregroundGravity="bottom"
-                android:src="@drawable/ic_baseline_add_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/apply"
-                app:layout_constraintStart_toEndOf="@+id/delete"
-                app:layout_constraintTop_toBottomOf="@+id/group_namesHome" />
+                <EditText
+                    android:id="@+id/mail"
+                    android:layout_width="363dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="24dp"
+                    android:hint="@string/prompt_email"
+                    android:inputType="textEmailAddress"
+                    android:selectAllOnFocus="true" />
 
-            <ImageView
-                android:id="@+id/apply"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:foregroundGravity="bottom"
-                android:src="@drawable/ic_baseline_done_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/next"
-                app:layout_constraintStart_toEndOf="@+id/add"
-                app:layout_constraintTop_toBottomOf="@+id/group_namesHome" />
+                <AutoCompleteTextView
+                    android:id="@+id/group_namesHome"
+                    android:layout_width="363dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="24dp"
+                    android:hint="@string/prompt_group"
+                    android:imeActionLabel="@string/action_sign_in_short"
+                    android:inputType="text"
+                    android:selectAllOnFocus="true" />
 
-            <EditText
-                android:id="@+id/id_user"
-                android:layout_width="363dp"
+                <EditText
+                    android:id="@+id/id_group"
+                    android:layout_width="363dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="24dp"
+                    android:clickable="false"
+                    android:editable="false"
+                    android:hint="@string/prompt_id_group"
+                    android:imeActionLabel="@string/action_sign_in_short"
+                    android:inputType="number"
+                    android:selectAllOnFocus="true"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/gallery_admins"
+                    android:layout_width="180dp"
+                    android:layout_height="200dp"
+                    android:layout_marginLeft="70dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:src="@drawable/ic_menu_gallery"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
-                android:editable="false"
-                android:enabled="false"
-                android:hint="Users id"
-                android:inputType="number"
-                android:selectAllOnFocus="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/sp_mode" />
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@+id/content">
 
-            <EditText
-                android:id="@+id/fio"
-                android:layout_width="363dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="24dp"
-                android:hint="FIO"
-                android:inputType="text"
-                android:selectAllOnFocus="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/id_user" />
+                <ImageView
+                    android:id="@+id/prev"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:foregroundGravity="bottom"
+                    android:src="@drawable/ic_baseline_arrow_left_24"
+                    android:background="?android:attr/selectableItemBackground"/>
 
+                <ImageView
+                    android:id="@+id/update"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:foregroundGravity="bottom"
+                    android:src="@drawable/ic_baseline_replay_24"
+                    android:background="?android:attr/selectableItemBackground"/>
 
-            <EditText
-                android:id="@+id/password"
-                android:layout_width="363dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="24dp"
-                android:hint="@string/prompt_password"
-                android:imeActionLabel="@string/action_sign_in_short"
-                android:imeOptions="actionDone"
-                android:inputType="number"
-                android:selectAllOnFocus="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/mail" />
+                <ImageView
+                    android:id="@+id/delete"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:foregroundGravity="bottom"
+                    android:src="@drawable/ic_baseline_delete_24"
+                    android:background="?android:attr/selectableItemBackground"/>
 
-            <EditText
-                android:id="@+id/mail"
-                android:layout_width="363dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="24dp"
-                android:hint="@string/prompt_email"
-                android:inputType="textEmailAddress"
-                android:selectAllOnFocus="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fio" />
+                <ImageView
+                    android:id="@+id/apply"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:foregroundGravity="bottom"
+                    android:src="@drawable/ic_baseline_done_24"
+                    android:background="?android:attr/selectableItemBackground"/>
 
-            <EditText
-                android:id="@+id/id_group"
-                android:layout_width="363dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="24dp"
-                android:clickable="false"
-                android:editable="false"
-                android:hint="@string/prompt_id_group"
-                android:imeActionLabel="@string/action_sign_in_short"
-                android:inputType="number"
-                android:selectAllOnFocus="true"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/password" />
+                <ImageView
+                    android:id="@+id/add"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:foregroundGravity="bottom"
+                    android:src="@drawable/ic_baseline_add_24"
+                    android:background="?android:attr/selectableItemBackground"/>
 
-            <AutoCompleteTextView
-                android:id="@+id/group_namesHome"
-                android:layout_width="363dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="24dp"
-                android:hint="@string/prompt_group"
-                android:imeActionLabel="@string/action_sign_in_short"
-                android:inputType="text"
-                android:selectAllOnFocus="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/id_group" />
-
-            <ImageView
-                android:id="@+id/gallery_admins"
-                android:layout_width="180dp"
-                android:layout_height="200dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:src="@drawable/ic_menu_gallery"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.498"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/delete"
-                app:layout_constraintVertical_bias="1.0" />
+                <ImageView
+                    android:id="@+id/next"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:foregroundGravity="bottom"
+                    android:src="@drawable/ic_baseline_arrow_right_24"
+                    android:background="?android:attr/selectableItemBackground"/>
+            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

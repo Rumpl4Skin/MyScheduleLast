@@ -62,14 +62,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TimeZone;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -98,8 +101,9 @@ public class HomeFragment extends Fragment implements EasyPermissions.Permission
     private static final String WED_R = "G2:H11";
     private static final String THU_R = "I2:J11";
     private static final String FRI_R = "K2:L11";
-    boolean isBeforeFri=false;
+    boolean isBeforeFri=false,tabsChange=false;
     int week=0;
+
     String change="";
 
     Map<Integer, String> tabs = new HashMap<Integer, String>();
@@ -704,11 +708,13 @@ int count=getCountDay(getNameDay(getCurrentDay()));
 
                 FragmentStateAdapter pageAdapter = new PageAdapter(getActivity(), scheldule);
                 pager.setAdapter(pageAdapter);
-
+                week=0;
+                if(!tabsChange){
                 new TabLayoutMediator(tabLayout, pager,
                         new TabLayoutMediator.TabConfigurationStrategy() {
 
                             @Override public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+
                                 Date date = new Date();
                                 SimpleDateFormat formatForDate = new SimpleDateFormat("dd.MM E");
                                 SimpleDateFormat formatForDay = new SimpleDateFormat("E");
@@ -716,14 +722,14 @@ int count=getCountDay(getNameDay(getCurrentDay()));
                                 String NameDay=formatForDay.format(date);
 
                                 Calendar c = Calendar.getInstance();
-                                try {
-                                    c.setTime(formatForDate.parse(Day));
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
+                                if(!isBeforeFri){
+                                c.add(Calendar.DATE, position);
+                                //c.add(Calendar.DAY_OF_MONTH, position);
                                 }
-                                if(!isBeforeFri)
-                                c.add(Calendar.DATE, position+1);
-                                else c.add(Calendar.DATE, position+2+week);
+                                else {
+                                    c.add(Calendar.DATE, position+1+week);
+                                    //c.add(Calendar.DAY_OF_MONTH, position);
+                                }
                                 NameDay = formatForDay.format(c.getTime());
                                 if(NameDay.equals("Sat")||NameDay.equals("СБ")){
                                     c.add(Calendar.DATE, 2);
@@ -737,8 +743,10 @@ int count=getCountDay(getNameDay(getCurrentDay()));
                                 }
                                 Day = formatForDate.format(c.getTime());
                                 tab.setText(Day/*+" "+tabs.get(position)*/);
+                                tabsChange=true;
                             }
                         }).attach();
+                }
                 if(change!="")
                 Snackbar.make(getView(),"Расписание изменено для: "+change, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
