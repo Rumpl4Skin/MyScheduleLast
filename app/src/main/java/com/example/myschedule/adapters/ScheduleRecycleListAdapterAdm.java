@@ -22,43 +22,59 @@ import com.example.myschedule.helper.ItemTouchHelperAdapter;
 import com.example.myschedule.ui.OnStartDragListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<RecyclerViewScheduleHolderAdm>implements ItemTouchHelperAdapter {
+public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<RecyclerViewScheduleHolderAdm>
+        implements ItemTouchHelperAdapter {
 
     private Subject[] subjects;
     private Context context;
-    private ArrayList<Subject> sbj;
+    private final List<Subject> mItems = new ArrayList<Subject>();
     private int count;
     private final OnStartDragListener mDragStartListener;
 
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
-
+        Subject prev = mItems.remove(fromPosition);
+        mItems.add(toPosition > fromPosition ? toPosition - 1 : toPosition, prev);
+        notifyItemMoved(fromPosition, toPosition);
+        subjects=new Subject[mItems.size()];
+        for(int i=0;i<mItems.size();i++)
+            subjects[i]=new Subject(mItems.get(i));
     }
 
     @Override
     public void onItemDismiss(int position) {
-
+        mItems.remove(position);
+        notifyItemRemoved(position);
+        
     }
 
-    /*public ScheduleRecycleListAdapter(Subject[] subjects) {
-        this.subjects = subjects;
-    }*/
     public interface OnDragStartListener {
         void onDragStarted(RecyclerView.ViewHolder viewHolder);
     }
-    public ScheduleRecycleListAdapterAdm(ArrayList<Subject> subjects, OnStartDragListener mDragStartListener) {
-        this.sbj = subjects;
-        this.mDragStartListener = mDragStartListener;
-    }
 
-    public ScheduleRecycleListAdapterAdm(Subject[] subjects, Context context, OnStartDragListener dragStartListener) {
+   /* public ScheduleRecycleListAdapterAdm(Map<String,Subject[]> subjects, int count, Context context, OnStartDragListener dragStartListener) {
+        this.subjects = subjects.get(""+count);
+        this.context = context;
+        this.count=count;
+        this.mDragStartListener = dragStartListener;
+        for(int i=0;i<subjects.get(""+count).length;i++){
+            mItems.add(subjects.get(""+count)[i]);
+        }
+    }*/
+    public ScheduleRecycleListAdapterAdm(Subject[] subjects, int count, Context context, OnStartDragListener dragStartListener) {
         this.subjects = subjects;
         this.context = context;
         this.count=count;
         this.mDragStartListener = dragStartListener;
+        for(int i=0;i<subjects.length;i++){
+            mItems.add(subjects[i]);
+        }
     }
 
     @Override
@@ -69,7 +85,7 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
     @NonNull
     @Override
     public RecyclerViewScheduleHolderAdm onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.frame_schedule_adm, parent, false);
         return new RecyclerViewScheduleHolderAdm(view);
     }
 
@@ -84,53 +100,6 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
             holder.getTxtSubject().setText(String.valueOf(subjects[position].getSubjectName()));
             holder.getTxtComm().setText(String.valueOf(subjects[position].getComm()));
         }
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-//Получаем вид с файла prompt.xml, который применим для диалогового окна:
-                LayoutInflater li = LayoutInflater.from(context);
-                View promptsView = li.inflate(R.layout.prompt, null);
-
-                //Создаем AlertDialog
-                AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(context);
-
-                //Настраиваем prompt.xml для нашего AlertDialog:
-                mDialogBuilder.setView(promptsView);
-
-                //Настраиваем отображение поля для ввода текста в открытом диалоге:
-                final EditText userInput = (EditText) promptsView.findViewById(R.id.input_text);
-
-                //Настраиваем сообщение в диалоговом окне:
-                mDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("Добавить",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-                                        //Вводим текст и отображаем в строке ввода на основном экране:
-                                        holder.getTxtComm().setText(userInput.getText());
-                                        SharedPreferences  sPref = context.getSharedPreferences("Comments", MODE_PRIVATE);
-
-                                        SharedPreferences.Editor ed = sPref.edit();
-                                        ed.putString(count++ +""+position+""+context.getSharedPreferences("MainActivity", MODE_PRIVATE)
-                                                .getString("group",""), userInput.getText().toString());
-                                        ed.commit();
-                                    }
-                                })
-                        .setNegativeButton("Отмена",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-
-                //Создаем AlertDialog:
-                AlertDialog alertDialog = mDialogBuilder.create();
-
-                //и отображаем его:
-                alertDialog.show();
-                return false;
-            }
-        });
 
         holder.getHandleView().setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -146,6 +115,6 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
 
     @Override
     public int getItemCount() {
-        return subjects.length;
+        return mItems.size();
     }
 }

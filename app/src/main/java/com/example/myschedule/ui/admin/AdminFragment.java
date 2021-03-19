@@ -1,7 +1,11 @@
 package com.example.myschedule.ui.admin;
 
+import android.Manifest;
+import android.accounts.AccountManager;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
@@ -10,6 +14,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -47,6 +53,8 @@ import com.example.myschedule.helper.SimpleItemTouchHelperCallback;
 import com.example.myschedule.ui.OnStartDragListener;
 import com.example.myschedule.ui.home.HomeFragment;
 import com.example.myschedule.utils.PageAdapter;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -57,6 +65,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
@@ -74,10 +83,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
-public class AdminFragment extends Fragment implements
+public class AdminFragment extends Fragment implements EasyPermissions.PermissionCallbacks,
         ScheduleRecycleListAdapterAdm.OnDragStartListener {
 
     GoogleAccountCredential mCredential;
@@ -103,6 +115,7 @@ public class AdminFragment extends Fragment implements
     Map<Integer, String> tabs = new HashMap<Integer, String>();
 
     private static final String[] SCOPES = { SheetsScopes.SPREADSHEETS_READONLY };
+    String[] days={"Понедельник","Вторник","Среда","Четверг","Пятница","Понедельник","Вторник","Среда","Четверг","Пятница"};
 
     private HomeFragment.OnFragmentSendDataListener fragmentSendDataListener;
     private RecyclerView recyclerView;
@@ -163,7 +176,7 @@ public class AdminFragment extends Fragment implements
     Subject[] subj;
     LoggedInUser us;
     Admins adm;
-    String[] mods = { MOD_USERS, MOD_ADMIN ,MOD_ZAYV,  MOD_DISC,MOD_SCHEDULE};
+    String[] mods = { MOD_USERS, MOD_ADMIN ,MOD_ZAYV,  MOD_DISC/*,MOD_SCHEDULE*/};
     String selected_mode=MOD_USERS;
     private ItemTouchHelper mItemTouchHelper;
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -203,11 +216,11 @@ public class AdminFragment extends Fragment implements
         } catch (SQLException mSQLException) {
             throw mSQLException;
         }
-/*
-        us=new LoggedInUser();
-        users = mDBHelper.getAllUser();
-        adm=new Admins();
-        admins = mDBHelper.getAllAdmins();*/
+        mCredential = GoogleAccountCredential.usingOAuth2(
+                getContext(), Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff());
+        mProgress = new ProgressDialog(getActivity());
+        mProgress.setMessage("Загрузка расписания ...");
 
 
         ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(root.getContext(), android.R.layout.simple_spinner_item, mods);
@@ -703,15 +716,122 @@ public class AdminFragment extends Fragment implements
                         });
                         break;
                     case 4:
-                        subjects=new Subject[1];
-                        subjects[0]=new Subject(0,"8/00-9.45","Предмет","","16", 10,20);
+                        setModeSchedule();
+
+
+                        count=0;
+                        /*if(users.length>0)
+                        us.clear(users);*/
+
+                      /*  edtIdUser.setText(""+ scheldule.get(""+count)[0].);
+                        edtFio.setText(subj[count].getSubjectName());
+                        edtMail.setText(""+subj[count].getLab_count());
+                        edtIdGroup.setText(""+ subj[count].getPract_count());*/
+
+
+
+
+                        btnUpdate.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                count=0;
+                                subj=mDBHelper.getAllSubjName_All();
+                                edtIdUser.setText(""+ subj[count].getId_subject());
+                                edtFio.setText(subj[count].getSubjectName());
+                                edtMail.setText(""+subj[count].getLab_count());
+                                edtIdGroup.setText(""+ subj[count].getPract_count());
+                                Toast.makeText(getContext(), "Обновлено", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        btnPrev.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if(count==0)
+                                    count=mDBHelper.getAllSubjName_All().length-1;
+                                else count=count-1;
+                                edtIdUser.setText(""+ subj[count].getId_subject());
+                                edtFio.setText(subj[count].getSubjectName());
+                                edtMail.setText(""+subj[count].getLab_count());
+                                edtIdGroup.setText(""+ subj[count].getPract_count());
+                            }
+                        });
+                        btnNext.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if(count== subj.length-1)
+                                    count=0;
+                                else count=count+1;
+                                edtIdUser.setText(""+ subj[count].getId_subject());
+                                edtFio.setText(subj[count].getSubjectName());
+                                edtMail.setText(""+subj[count].getLab_count());
+                                edtIdGroup.setText(""+ subj[count].getPract_count());
+                            }
+                        });
+                        btnDel.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                mDb.delete(TABLE_DISC,
+                                        ID_DISC+" = ?",
+                                        new String[] {edtIdUser.getText().toString()});
+                                Toast.makeText(getContext(), "Запись удалена", Toast.LENGTH_SHORT).show();
+                                updateSubjectUI();
+                                count--;
+                            }
+                        });
+                        btnApply.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                ContentValues newValues = new ContentValues();
+// Задайте значения для каждой строки.
+
+                                newValues.put(ID_DISC,  edtIdUser.getText().toString());
+                                newValues.put(DISC_NAME,  edtFio.getText().toString());
+                                newValues.put(DISC_LAB,  edtMail.getText().toString());
+                                newValues.put(DISC_PRACT, edtIdGroup.getText().toString());
+                                mDb.update (TABLE_DISC, newValues, ID_DISC+"="+edtIdUser.getText().toString(), null);
+
+                                Toast.makeText(getContext(), "Запись отредактирована!", Toast.LENGTH_SHORT).show();
+                                updateSubjectUI();
+                            }
+                        });
+                        btnAdd.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ContentValues newValues = new ContentValues();
+                                if(!is_edit){
+                                    edtIdUser.setText("");
+                                    edtFio.setText("");
+                                    edtMail.setText("");
+                                    edtIdGroup.setText("");
+                                    is_edit=true;
+                                    Toast.makeText(getContext(), "Введите данные для добавления надписи", Toast.LENGTH_SHORT).show();
+                                }
+
+                                if((edtFio.getText().toString().equals(""))
+                                        ||edtMail.getText().toString().equals(""))
+                                    Toast.makeText(getContext(), "Не все поля заполнены ", Toast.LENGTH_LONG).show();
+                                else {
+                                    newValues.put(DISC_NAME, edtFio.getText().toString());
+                                    newValues.put(DISC_LAB, edtMail.getText().toString());
+                                    newValues.put(DISC_PRACT, edtIdGroup.getText().toString());
+// Добавление в бд
+                                    mDb.insert(TABLE_DISC, null, newValues);
+                                    count++;
+                                    Toast.makeText(getContext(), "Запись добавлена!", Toast.LENGTH_SHORT).show();
+                                    updateSubjectUI();
+                                    is_edit=false;
+                                }
+                            }
+                        });
+                        getResultsFromApi();
                         recyclerView.setHasFixedSize(true);
-                        ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(subjects,getContext(),AdminFragment.this::onDragStarted);
+                       /* ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(subjects,count,getContext(),AdminFragment.this::onDragStarted);
                         recyclerView.setAdapter(adapterr);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
                         mItemTouchHelper = new ItemTouchHelper(callback);
-                        mItemTouchHelper.attachToRecyclerView(recyclerView);
+                        mItemTouchHelper.attachToRecyclerView(recyclerView);*/
                         break;
                 }
 
@@ -941,6 +1061,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtPsw.setVisibility(View.GONE);
 
         edtGroupName.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
     }
     public void setModeZayvl(){
 
@@ -956,6 +1077,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtPsw.setVisibility(View.GONE);
         edtIdGroup.setVisibility(View.GONE);
         edtGroupName.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
     }
     public void setModeUsers(){
 
@@ -963,6 +1085,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtPsw.setVisibility(View.VISIBLE);
         edtIdGroup.setVisibility(View.GONE);
         edtGroupName.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
 
         count=0;
 //        us.clear(users);
@@ -981,6 +1104,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtIdGroup.setVisibility(View.VISIBLE);
         edtGroupName.setVisibility(View.GONE);
         edtMail.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
 
         count=0;
 //        us.clear(users);
@@ -993,6 +1117,38 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         edtMail.setHint("Количество лабораторных");
         edtIdGroup.setText(""+subj[count].getPract_count());
         edtIdGroup.setHint("Количество практических");
+
+    }
+    public void setModeSchedule(){
+
+        imgAdmins.setVisibility(View.GONE);
+        edtPsw.setVisibility(View.GONE);
+        edtIdGroup.setVisibility(View.GONE);
+        edtGroupName.setVisibility(View.VISIBLE);
+        edtMail.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
+
+        List<String> namesList = Arrays.asList(mDBHelper.getAllGroupName());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                getContext(), android.R.layout.simple_dropdown_item_1line, namesList);
+        edtGroupName.setAdapter(adapter);
+        edtGroupName.setThreshold(1);
+        edtGroupName.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                if(edtGroupName.getText().toString().equals("Admin Group"))
+                    Toast.makeText(getActivity().getApplicationContext(), "Расписание не доступно для администраторов", Toast.LENGTH_SHORT).show();
+                else if(edtGroupName.getText().toString().equals("42и")||edtGroupName.getText().toString().equals("32и"))
+                    getResultsFromApi();
+                else Toast.makeText(getActivity().getApplicationContext(), "Расписание данной группы пока недоступно", Toast.LENGTH_LONG).show();
+            }
+        });
+        count=0;
+        getResultsFromApi();
+
+        //edtIdUser.setText(""+ subjects[count].get);
+
 
     }
     public void setImgAdmins(String pathImg){
@@ -1016,7 +1172,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
             }
         }
     }
-    @Override
+   /* @Override
     public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
 
@@ -1058,7 +1214,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                         e.printStackTrace();
                     }
                 }
-        }}
+        }}*/
 
 
 
@@ -1066,6 +1222,514 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onDragStarted(RecyclerView.ViewHolder viewHolder) {
         mItemTouchHelper.startDrag(viewHolder);
+    }
+
+
+
+    public String getCurrentDay(){
+        Date date = new Date();
+        SimpleDateFormat formatForDateNow = new SimpleDateFormat("E");
+        String Day="";
+        switch (formatForDateNow.format(date)){
+            case "Пн": Day= MON_R; break;
+            case "Mon": Day= MON_R; break;
+            case "Вт": Day= TUE_R;break;
+            case "Tue": Day= TUE_R; break;
+            case "Ср": Day= WED_R;break;
+            case "Wed": Day= WED_R; break;
+            case "Чт": Day= THU_R;break;
+            case "Thu": Day= THU_R; break;
+            case "Пт": Day= FRI_R;break;
+            case "Fri": Day= FRI_R; break;
+            case "Сб": Day= MON_R; break;
+            case "Sat": Day= MON_R; break;
+            case "Вс": Day= MON_R;break;
+            case "Sun": Day= MON_R; break;
+        }
+        return Day;
+    }
+    public String getNameDay(String name){
+
+        String Day="";
+        switch (name){
+
+            case MON_R: Day="Пн" ; break;
+
+            case TUE_R: Day="Вт" ;break;
+
+            case WED_R: Day= "Ср";break;
+
+            case THU_R: Day= "Чт";break;
+            case FRI_R: Day= "Пт";break;
+
+        }
+        return Day;
+    }
+    public int getCountDay(String name){
+
+        int Day=0;
+        switch (name){
+
+            case MON_R: Day=0 ; break;
+
+            case TUE_R: Day=1 ;break;
+
+            case WED_R: Day= 2;break;
+
+            case THU_R: Day= 3;break;
+            case FRI_R: Day= 4;break;
+
+        }
+        return Day;
+    }
+    public String getDayRange(String day){
+
+        String Day="";
+        switch (day){
+
+            case "Понедельник": Day= MON_R; break;
+            case "Mon": Day= MON_R; break;
+            case "Вторник": Day= TUE_R;break;
+            case "Tue": Day= TUE_R; break;
+            case "Среда": Day= WED_R;break;
+            case "Wed": Day= WED_R; break;
+            case "Четверг": Day= THU_R;break;
+            case "Thu": Day= THU_R; break;
+            case "Пятница": Day= FRI_R;break;
+            case "Fri": Day= FRI_R; break;
+
+        }
+        return Day;
+    }
+    public void setSubjects(Subject[] subjects) {
+        this.subjects = subjects;
+    }
+
+    public void setSchelduleAdapter(Subject[] subjects){
+        this.subjects=subjects;
+        if(this.subjects != null) {
+            //Subject[] subjects=new Subject[arguments.getInt("Schl_size")];
+            // subjects= (Subject[]) arguments.getParcelableArray("SchelduleList");
+            this.subjects = (Subject[]) getArguments().getParcelableArray("SchelduleList");
+
+            //Subject[] subjects={new Subject("9.00-10.40","Ботаника","10 лаб","26"),
+            //       new Subject("8.55-9.40","Контроль качества продукции в сфере д/о и призводства мебели","fdkjgflkgjdjdlgjfdlkgjldjglfdfgjd","26")};
+
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            // recyclerView.setAdapter(new ScheduleRecycleListAdapter(subjects,getContext()));}
+            /*else*/
+            Toast.makeText(getActivity().getApplicationContext(), "Расписание не доступно", Toast.LENGTH_SHORT).show();
+        }}
+
+    /**
+     * Attempt to call the API, after verifying that all the preconditions are
+     * satisfied. The preconditions are: Google Play Services installed, an
+     * account was selected and the device currently has online access. If any
+     * of the preconditions are not satisfied, the app will prompt the user as
+     * appropriate.
+     */
+    public void getResultsFromApi() {
+        if (! isGooglePlayServicesAvailable()) {
+            acquireGooglePlayServices();
+        } else if (mCredential.getSelectedAccountName() == null) {
+            chooseAccount();
+        } else if (! isDeviceOnline()) {
+            Toast.makeText(getActivity(), "No network connection available.", Toast.LENGTH_LONG).show();
+        } else {
+
+            new AdminFragment.MakeRequestTask(mCredential).execute();
+        }
+    }
+
+    /**
+     * Attempts to set the account used with the API credentials. If an account
+     * name was previously saved it will use that one; otherwise an account
+     * picker dialog will be shown to the user. Note that the setting the
+     * account to use with the credentials object requires the app to have the
+     * GET_ACCOUNTS permission, which is requested here if it is not already
+     * present. The AfterPermissionGranted annotation indicates that this
+     * function will be rerun automatically whenever the GET_ACCOUNTS permission
+     * is granted.
+     */
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+    private void chooseAccount() {
+        if (EasyPermissions.hasPermissions(
+                getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+            String accountName = getActivity().getPreferences(Context.MODE_PRIVATE)
+                    .getString(PREF_ACCOUNT_NAME, null);
+            if (accountName != null) {
+                mCredential.setSelectedAccountName(accountName);
+                getResultsFromApi();
+            } else {
+                // Start a dialog from which the user can choose an account
+                startActivityForResult(
+                        mCredential.newChooseAccountIntent(),
+                        REQUEST_ACCOUNT_PICKER);
+            }
+        } else {
+            // Request the GET_ACCOUNTS permission via a user dialog
+            EasyPermissions.requestPermissions(
+                    this,
+                    "This app needs to access your Google account (via Contacts).",
+                    REQUEST_PERMISSION_GET_ACCOUNTS,
+                    Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+    /**
+     * Called when an activity launched here (specifically, AccountPicker
+     * and authorization) exits, giving you the requestCode you started it with,
+     * the resultCode it returned, and any additional data from it.
+     * @param requestCode code indicating which activity result is incoming.
+     * @param resultCode code indicating the result of the incoming
+     *     activity result.
+     * @param data Intent (containing result data) returned by incoming
+     *     activity result.
+     */
+    @Override
+    public void onActivityResult(
+            int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case REQUEST_GOOGLE_PLAY_SERVICES:
+                if (resultCode != RESULT_OK) {
+                    Toast.makeText(getActivity(),
+                            "This app requires Google Play Services. Please install Google Play Services on your device and relaunch this app.", Toast.LENGTH_LONG).show();
+                } else {
+                    getResultsFromApi();
+                }
+                break;
+            case REQUEST_ACCOUNT_PICKER:
+                if (resultCode == RESULT_OK && data != null &&
+                        data.getExtras() != null) {
+                    String accountName =
+                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        SharedPreferences settings =
+                                getActivity().getPreferences(Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.apply();
+                        mCredential.setSelectedAccountName(accountName);
+                        getResultsFromApi();
+                    }
+                }
+                break;
+            case REQUEST_AUTHORIZATION:
+                if (resultCode == RESULT_OK) {
+                    getResultsFromApi();
+                }
+                break;
+        }
+    }
+
+    /**
+     * Respond to requests for permissions at runtime for API 23 and above.
+     * @param requestCode The request code passed in
+     *     requestPermissions(android.app.Activity, String, int, String[])
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(
+                requestCode, permissions, grantResults, this);
+    }
+
+    /**
+     * Callback for when a permission is granted using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    /**
+     * Callback for when a permission is denied using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    /**
+     * Checks whether the device currently has a network connection.
+     * @return true if the device has a network connection, false otherwise.
+     */
+    private boolean isDeviceOnline() {
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
+    }
+
+    /**
+     * Check that Google Play services APK is installed and up to date.
+     * @return true if Google Play Services is available and up to
+     *     date on this device; false otherwise.
+     */
+    private boolean isGooglePlayServicesAvailable() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(getContext());
+        return connectionStatusCode == ConnectionResult.SUCCESS;
+    }
+
+    /**
+     * Attempt to resolve a missing, out-of-date, invalid or disabled Google
+     * Play Services installation via a user dialog, if possible.
+     */
+    private void acquireGooglePlayServices() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(getContext());
+        if (apiAvailability.isUserResolvableError(connectionStatusCode)) {
+            showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
+        }
+    }
+
+
+    /**
+     * Display an error dialog showing that Google Play Services is missing
+     * or out of date.
+     * @param connectionStatusCode code describing the presence (or lack of)
+     *     Google Play Services on this device.
+     */
+    void showGooglePlayServicesAvailabilityErrorDialog(
+            final int connectionStatusCode) {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        Dialog dialog = apiAvailability.getErrorDialog(
+                getActivity(),
+                connectionStatusCode,
+                REQUEST_GOOGLE_PLAY_SERVICES);
+        dialog.show();
+    }
+
+
+
+
+    /**
+     * An asynchronous task that handles the Google Sheets API call.
+     * Placing the API calls in their own task ensures the UI stays responsive.
+     */
+    private class MakeRequestTask extends AsyncTask<Void, Void, Map<String,Subject[]>> {
+        private com.google.api.services.sheets.v4.Sheets mService = null;
+        private Exception mLastError = null;
+
+        MakeRequestTask(GoogleAccountCredential credential) {
+            HttpTransport transport = AndroidHttp.newCompatibleTransport();
+            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            mService = new com.google.api.services.sheets.v4.Sheets.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("Google Sheets API Android Quickstart")
+                    .build();
+        }
+
+        /**
+         * Background task to call Google Sheets API.
+         * @param params no parameters needed for this task.
+         * @return
+         */
+        @Override
+        protected Map<String,Subject[]> doInBackground(Void... params) {
+            try {
+                if(edtGroupName.getText().toString().equals("32и"))
+                    return getDataFromApi(SPREAD_SHEET_32I,TABLE_NAME_CH,getCurrentDay());
+
+                else
+                if(edtGroupName.getText().toString().equals("42и"))
+                    return getDataFromApi(SPREAD_SHEET_42I,TABLE_NAME_CH,getCurrentDay());
+                else {
+                    //Toast.makeText(getContext(),"Расписание для выбранной группы не доступно",Toast.LENGTH_LONG).show();
+                    cancel(true);
+                    return null;
+                }
+            } catch (Exception e) {
+                mLastError = e;
+                cancel(true);
+                return null;
+            }
+        }
+
+        /**
+         * Fetch a list of names and majors of students in a sample spreadsheet:
+         * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+         * @return List of names and majors
+         * @throws IOException
+         */
+        private Map<String,Subject[]> getDataFromApi(String spreadsheetId, String table, String day) throws IOException {
+            //spreadsheetId = "1XcATglqKX3IomyzjEaFv4h65B6z0wSNyIkl3Ld4omz0";
+            Map<String, Subject[]> schedule = new HashMap<String, Subject[]>();
+            String range="B14";
+
+
+            ArrayList<Subject> results = new ArrayList<Subject>();
+
+            ValueRange response = this.mService.spreadsheets().values()
+                    .get(spreadsheetId, range)
+                    .execute();
+            List<List<Object>> values = response.getValues();
+
+            if (values != null) {
+                for (int i = 0; i < values.size(); i++) {
+
+                    if (values.get(i).size() == 1){
+                        change=values.get(i).get(0).toString();
+                    }
+                    else if(values.get(i).size() == 0)
+                        change="";
+                }
+            }
+
+            int count=getCountDay(getNameDay(getCurrentDay()));
+            for(int k=/*count*/0;k</*count+*/10;k++) {
+                if(k<4){
+                    range = TABLE_NAME_CH + "!" + getDayRange(days[k]);
+                }
+                else {
+                    range = TABLE_NAME_ZN + "!" + getDayRange(days[k]);
+                }
+                tabs.put(k,getNameDay(getDayRange(days[k])));
+                results = new ArrayList<Subject>();
+
+                response = this.mService.spreadsheets().values()
+                        .get(spreadsheetId, range)
+                        .execute();
+                values = response.getValues();
+
+                if (values != null) {
+                    for (int i = 0; i < values.size(); i++) {
+                        if (values.get(i).size() == 1)
+                            results.add(new Subject(Time(i), values.get(i).get(0).toString(), "", ""));
+                        else if (values.get(i).size() == 2)
+                            results.add(new Subject(Time(i), values.get(i).get(0).toString(), "", values.get(i).get(1).toString()));
+                    }
+                }
+
+                //Toast.makeText(this, "Text loaded", Toast.LENGTH_SHORT).show();
+                Subject[] fin_res = new Subject[results.size()];
+                for (int i = 0; i < fin_res.length; i++){
+                    fin_res[i] = results.get(i);
+
+                }
+                if(!getActivity().getSharedPreferences("Comments", MODE_PRIVATE).equals(null)){
+                    for(int i = 0; i < fin_res.length; i++) {
+                        SharedPreferences sPref = getActivity().getSharedPreferences("Comments", MODE_PRIVATE);
+                        String savedText = sPref.getString(k+"" + i+getActivity().getPreferences( MODE_PRIVATE).getString("group",""), "");
+                        fin_res[i].setComm(savedText);
+                    }
+                }
+                schedule.put(days[k],fin_res);
+            }
+            return schedule;
+        }
+        public String Time(int i){
+            String ret="";
+            switch (i){
+                case 0:
+                    ret= "8.00-8.45";
+                    break;
+                case 1:
+                    ret= "8.55-9.40";
+                    break;
+                case 2:
+                    ret= "9.50-10.35";
+                    break;
+                case 3:
+                    ret= "10.45-11.30";
+                    break;
+                case 4:
+                    ret= "11.40-12.25";
+                    break;
+                case 5:
+                    ret= "12.35-13.20";
+                    break;
+                case 6:
+                    ret= "13.30-14.15";
+                    break;
+                case 7:
+                    ret= "14.25-15.10";
+                    break;
+                case 8:
+                    ret= "15.20-16.05";
+                    break;
+                case 9:
+                    ret= "16.15-17.00";
+                    break;
+                case 10:
+                    ret= "17.10-17.55";
+                    break;
+                case 11:
+                    ret= "18.05 - 18.50";
+                    break;
+                case 12:
+                    ret= "19.00 - 19.45";
+                    break;
+                case 13:
+                    ret= "19.55 - 20.40";
+                    break;
+
+            }
+            return ret;
+        }
+
+
+
+        @Override
+        protected void onPreExecute() {
+            mProgress.show();
+        }
+
+        @Override
+        protected void onPostExecute(Map<String,Subject[]> output) {
+            super.onPostExecute(output);
+            mProgress.hide();
+            if (output == null || output.size() == 0) {
+                Toast.makeText(getContext(), "Расписание для данной группы пока не доступно", Toast.LENGTH_LONG).show();
+            } else {
+                scheldule=output;
+               // subject=scheldule;
+               // ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(scheldule,count,getContext(),AdminFragment.this::onDragStarted);
+             //   recyclerView.setAdapter(adapterr);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            }
+
+        }
+
+        @Override
+        protected void onCancelled() {
+            mProgress.hide();
+            if (mLastError != null) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+                    startActivityForResult(
+                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                            REQUEST_AUTHORIZATION);
+                } else {
+                    Toast.makeText(getContext(), "The following error occurred:"+mLastError.getMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            } else {
+                Toast.makeText(getContext(), "Request cancelled.", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
 
