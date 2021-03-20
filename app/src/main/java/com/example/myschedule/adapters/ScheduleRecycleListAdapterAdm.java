@@ -41,6 +41,9 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
     public void onItemMove(int fromPosition, int toPosition) {
         Subject prev = mItems.remove(fromPosition);
         mItems.add(toPosition > fromPosition ? toPosition - 1 : toPosition, prev);
+        for(int i=0;i<mItems.size();i++){
+            mItems.get(i).setTime(Time(i));
+        }
         notifyItemMoved(fromPosition, toPosition);
         subjects=new Subject[mItems.size()];
         for(int i=0;i<mItems.size();i++)
@@ -98,7 +101,7 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
             else
             holder.getTxtCab().setText(String.valueOf(subjects[position].getCab() + " кб"));
             holder.getTxtSubject().setText(String.valueOf(subjects[position].getSubjectName()));
-            holder.getTxtComm().setText(String.valueOf(subjects[position].getComm()));
+            //holder.getTxtComm().setText(String.valueOf(subjects[position].getComm()));
         }
 
         holder.getHandleView().setOnTouchListener(new View.OnTouchListener() {
@@ -117,4 +120,54 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
     public int getItemCount() {
         return mItems.size();
     }
+    public String Time(int i){
+        String ret="";
+        switch (i){
+            case 0:
+                ret= "8.00-8.45";
+                break;
+            case 1:
+                ret= "8.55-9.40";
+                break;
+            case 2:
+                ret= "9.50-10.35";
+                break;
+            case 3:
+                ret= "10.45-11.30";
+                break;
+            case 4:
+                ret= "11.40-12.25";
+                break;
+            case 5:
+                ret= "12.35-13.20";
+                break;
+            case 6:
+                ret= "13.30-14.15";
+                break;
+            case 7:
+                ret= "14.25-15.10";
+                break;
+            case 8:
+                ret= "15.20-16.05";
+                break;
+            case 9:
+                ret= "16.15-17.00";
+                break;
+            case 10:
+                ret= "17.10-17.55";
+                break;
+            case 11:
+                ret= "18.05 - 18.50";
+                break;
+            case 12:
+                ret= "19.00 - 19.45";
+                break;
+            case 13:
+                ret= "19.55 - 20.40";
+                break;
+
+        }
+        return ret;
+    }
 }
+

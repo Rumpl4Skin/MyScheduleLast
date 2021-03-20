@@ -66,7 +66,10 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
+import com.google.api.services.sheets.v4.model.BatchUpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
 import java.io.File;
@@ -111,7 +114,7 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
     boolean isBeforeFri=false,tabsChange=false;
     int week=0;
     String change="";
-
+    Map<Integer, Subject[]> schedules = new HashMap<Integer, Subject[]>();
     Map<Integer, String> tabs = new HashMap<Integer, String>();
 
     private static final String[] SCOPES = { SheetsScopes.SPREADSHEETS_READONLY };
@@ -176,7 +179,7 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
     Subject[] subj;
     LoggedInUser us;
     Admins adm;
-    String[] mods = { MOD_USERS, MOD_ADMIN ,MOD_ZAYV,  MOD_DISC/*,MOD_SCHEDULE*/};
+    String[] mods = { MOD_USERS, MOD_ADMIN ,MOD_ZAYV,  MOD_DISC,MOD_SCHEDULE};
     String selected_mode=MOD_USERS;
     private ItemTouchHelper mItemTouchHelper;
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -715,31 +718,14 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
                             }
                         });
                         break;
-                    case 4:
+                    case 4://расписание
                         setModeSchedule();
-
-
                         count=0;
-                        /*if(users.length>0)
-                        us.clear(users);*/
-
-                      /*  edtIdUser.setText(""+ scheldule.get(""+count)[0].);
-                        edtFio.setText(subj[count].getSubjectName());
-                        edtMail.setText(""+subj[count].getLab_count());
-                        edtIdGroup.setText(""+ subj[count].getPract_count());*/
-
-
-
-
                         btnUpdate.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 count=0;
-                                subj=mDBHelper.getAllSubjName_All();
-                                edtIdUser.setText(""+ subj[count].getId_subject());
-                                edtFio.setText(subj[count].getSubjectName());
-                                edtMail.setText(""+subj[count].getLab_count());
-                                edtIdGroup.setText(""+ subj[count].getPract_count());
+                                getResultsFromApi();
                                 Toast.makeText(getContext(), "Обновлено", Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -747,24 +733,36 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
                             @Override
                             public void onClick(View v) {
                                 if(count==0)
-                                    count=mDBHelper.getAllSubjName_All().length-1;
+                                    count=schedules.size()-1;
                                 else count=count-1;
-                                edtIdUser.setText(""+ subj[count].getId_subject());
-                                edtFio.setText(subj[count].getSubjectName());
-                                edtMail.setText(""+subj[count].getLab_count());
-                                edtIdGroup.setText(""+ subj[count].getPract_count());
+                                ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(schedules.get(count),count,getContext(),AdminFragment.this::onDragStarted);
+                                recyclerView.setAdapter(adapterr);
+                                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                                if(count<=5)
+                                edtFio.setText(days[count]+" Числитель");
+                                else
+                                    edtFio.setText(days[count]+" Знаменатель");
+                                ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
+                                mItemTouchHelper = new ItemTouchHelper(callback);
+                                mItemTouchHelper.attachToRecyclerView(recyclerView);
                             }
                         });
                         btnNext.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                if(count== subj.length-1)
+                                if(count == schedules.size()-1)
                                     count=0;
                                 else count=count+1;
-                                edtIdUser.setText(""+ subj[count].getId_subject());
-                                edtFio.setText(subj[count].getSubjectName());
-                                edtMail.setText(""+subj[count].getLab_count());
-                                edtIdGroup.setText(""+ subj[count].getPract_count());
+                                ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(schedules.get(count),count,getContext(),AdminFragment.this::onDragStarted);
+                                recyclerView.setAdapter(adapterr);
+                                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                                if(count<=5)
+                                    edtFio.setText(days[count]+" Числитель");
+                                else
+                                    edtFio.setText(days[count]+" Знаменатель");
+                                ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
+                                mItemTouchHelper = new ItemTouchHelper(callback);
+                                mItemTouchHelper.attachToRecyclerView(recyclerView);
                             }
                         });
                         btnDel.setOnClickListener(new View.OnClickListener() {
@@ -782,14 +780,16 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
                             @Override
                             public void onClick(View v) {
 
-                                ContentValues newValues = new ContentValues();
-// Задайте значения для каждой строки.
+                                if (! isGooglePlayServicesAvailable()) {
+                                    acquireGooglePlayServices();
+                                } else if (mCredential.getSelectedAccountName() == null) {
+                                    chooseAccount();
+                                } else if (! isDeviceOnline()) {
+                                    Toast.makeText(getActivity(), "No network connection available.", Toast.LENGTH_LONG).show();
+                                } else {
 
-                                newValues.put(ID_DISC,  edtIdUser.getText().toString());
-                                newValues.put(DISC_NAME,  edtFio.getText().toString());
-                                newValues.put(DISC_LAB,  edtMail.getText().toString());
-                                newValues.put(DISC_PRACT, edtIdGroup.getText().toString());
-                                mDb.update (TABLE_DISC, newValues, ID_DISC+"="+edtIdUser.getText().toString(), null);
+                                    new AdminFragment.MakeRequestTask(mCredential).execute();
+                                }
 
                                 Toast.makeText(getContext(), "Запись отредактирована!", Toast.LENGTH_SHORT).show();
                                 updateSubjectUI();
@@ -1120,7 +1120,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
 
     }
     public void setModeSchedule(){
-
+        edtIdUser.setVisibility(View.GONE);
         imgAdmins.setVisibility(View.GONE);
         edtPsw.setVisibility(View.GONE);
         edtIdGroup.setVisibility(View.GONE);
@@ -1622,17 +1622,12 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
 
                 //Toast.makeText(this, "Text loaded", Toast.LENGTH_SHORT).show();
                 Subject[] fin_res = new Subject[results.size()];
+                subjects=new Subject[results.size()];
                 for (int i = 0; i < fin_res.length; i++){
                     fin_res[i] = results.get(i);
-
+                    subjects[i]=fin_res[i];
                 }
-                if(!getActivity().getSharedPreferences("Comments", MODE_PRIVATE).equals(null)){
-                    for(int i = 0; i < fin_res.length; i++) {
-                        SharedPreferences sPref = getActivity().getSharedPreferences("Comments", MODE_PRIVATE);
-                        String savedText = sPref.getString(k+"" + i+getActivity().getPreferences( MODE_PRIVATE).getString("group",""), "");
-                        fin_res[i].setComm(savedText);
-                    }
-                }
+                schedules.put(k,fin_res);
                 schedule.put(days[k],fin_res);
             }
             return schedule;
@@ -1702,10 +1697,240 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                 Toast.makeText(getContext(), "Расписание для данной группы пока не доступно", Toast.LENGTH_LONG).show();
             } else {
                 scheldule=output;
-               // subject=scheldule;
-               // ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(scheldule,count,getContext(),AdminFragment.this::onDragStarted);
-             //   recyclerView.setAdapter(adapterr);
+
+                ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(subjects,count,getContext(),AdminFragment.this::onDragStarted);
+                recyclerView.setAdapter(adapterr);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
+                mItemTouchHelper = new ItemTouchHelper(callback);
+                mItemTouchHelper.attachToRecyclerView(recyclerView);
+
+            }
+
+        }
+
+        @Override
+        protected void onCancelled() {
+            mProgress.hide();
+            if (mLastError != null) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+                    startActivityForResult(
+                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                            REQUEST_AUTHORIZATION);
+                } else {
+                    Toast.makeText(getContext(), "The following error occurred:"+mLastError.getMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            } else {
+                Toast.makeText(getContext(), "Request cancelled.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+
+
+
+    /**
+     * An asynchronous task that handles the Google Sheets API call.
+     * Placing the API calls in their own task ensures the UI stays responsive.
+     */
+    private class MakeRequestTaskUpd extends AsyncTask<Void, Void, Map<String,Subject[]>> {
+        private com.google.api.services.sheets.v4.Sheets mService = null;
+        private Exception mLastError = null;
+
+        MakeRequestTaskUpd(GoogleAccountCredential credential) {
+            HttpTransport transport = AndroidHttp.newCompatibleTransport();
+            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            mService = new com.google.api.services.sheets.v4.Sheets.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("Google Sheets API Android Quickstart")
+                    .build();
+        }
+
+        /**
+         * Background task to call Google Sheets API.
+         * @param params no parameters needed for this task.
+         * @return
+         */
+        @Override
+        protected Map<String,Subject[]> doInBackground(Void... params) {
+            try {
+                if(edtGroupName.getText().toString().equals("32и"))
+                    return getDataFromApi(SPREAD_SHEET_32I,TABLE_NAME_CH,getCurrentDay());
+
+                else
+                if(edtGroupName.getText().toString().equals("42и"))
+                    return getDataFromApi(SPREAD_SHEET_42I,TABLE_NAME_CH,getCurrentDay());
+                else {
+                    //Toast.makeText(getContext(),"Расписание для выбранной группы не доступно",Toast.LENGTH_LONG).show();
+                    cancel(true);
+                    return null;
+                }
+            } catch (Exception e) {
+                mLastError = e;
+                cancel(true);
+                return null;
+            }
+        }
+
+        /**
+         * Fetch a list of names and majors of students in a sample spreadsheet:
+         * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+         * @return List of names and majors
+         * @throws IOException
+         */
+        private Map<String,Subject[]> getDataFromApi(String spreadsheetId, String table, String day) throws IOException {
+            //spreadsheetId = "1XcATglqKX3IomyzjEaFv4h65B6z0wSNyIkl3Ld4omz0";
+            Map<String, Subject[]> schedule = new HashMap<String, Subject[]>();
+            List<List<Object>> values = Arrays.asList(
+                    Arrays.asList(
+                            // Cell values ...
+                    )
+                    // Additional rows ...
+            );
+            // [START_EXCLUDE silent]
+        /*    values = _values;
+            // [END_EXCLUDE]
+            List<ValueRange> data = new ArrayList<ValueRange>();
+            data.add(new ValueRange()
+                    .setRange(range)
+                    .setValues(values));
+            // TODO: Assign values to desired fields of `requestBody`:
+            BatchUpdateValuesRequest requestBody = new BatchUpdateValuesRequest();
+            requestBody.setValueInputOption(valueInputOption);
+            requestBody.setData(data);
+
+
+            Sheets.Spreadsheets.Values.BatchUpdate request =
+                    this.mService.spreadsheets().values().batchUpdate(spreadsheetId, requestBody);
+
+            BatchUpdateValuesResponse response = request.execute();
+
+            if (values != null) {
+                for (int i = 0; i < values.size(); i++) {
+
+                    if (values.get(i).size() == 1){
+                        change=values.get(i).get(0).toString();
+                    }
+                    else if(values.get(i).size() == 0)
+                        change="";
+                }
+            }
+
+            int count=getCountDay(getNameDay(getCurrentDay()));*/
+            for(int k=/*count*/0;k</*count+*/10;k++) {
+               /* if(k<4){
+                    range = TABLE_NAME_CH + "!" + getDayRange(days[k]);
+                }
+                else {
+                    range = TABLE_NAME_ZN + "!" + getDayRange(days[k]);
+                }
+                tabs.put(k,getNameDay(getDayRange(days[k])));
+                results = new ArrayList<Subject>();
+
+                response = this.mService.spreadsheets().values()
+                        .get(spreadsheetId, range)
+                        .execute();
+                values = response.getValues();
+
+                if (values != null) {
+                    for (int i = 0; i < values.size(); i++) {
+                        if (values.get(i).size() == 1)
+                            results.add(new Subject(Time(i), values.get(i).get(0).toString(), "", ""));
+                        else if (values.get(i).size() == 2)
+                            results.add(new Subject(Time(i), values.get(i).get(0).toString(), "", values.get(i).get(1).toString()));
+                    }
+                }
+
+                //Toast.makeText(this, "Text loaded", Toast.LENGTH_SHORT).show();
+                Subject[] fin_res = new Subject[results.size()];
+                subjects=new Subject[results.size()];
+                for (int i = 0; i < fin_res.length; i++){
+                    fin_res[i] = results.get(i);
+                    subjects[i]=fin_res[i];*/
+                }
+               /* schedules.put(k,fin_res);
+                schedule.put(days[k],fin_res);
+            }*/
+            return schedule;
+        }
+        public String Time(int i){
+            String ret="";
+            switch (i){
+                case 0:
+                    ret= "8.00-8.45";
+                    break;
+                case 1:
+                    ret= "8.55-9.40";
+                    break;
+                case 2:
+                    ret= "9.50-10.35";
+                    break;
+                case 3:
+                    ret= "10.45-11.30";
+                    break;
+                case 4:
+                    ret= "11.40-12.25";
+                    break;
+                case 5:
+                    ret= "12.35-13.20";
+                    break;
+                case 6:
+                    ret= "13.30-14.15";
+                    break;
+                case 7:
+                    ret= "14.25-15.10";
+                    break;
+                case 8:
+                    ret= "15.20-16.05";
+                    break;
+                case 9:
+                    ret= "16.15-17.00";
+                    break;
+                case 10:
+                    ret= "17.10-17.55";
+                    break;
+                case 11:
+                    ret= "18.05 - 18.50";
+                    break;
+                case 12:
+                    ret= "19.00 - 19.45";
+                    break;
+                case 13:
+                    ret= "19.55 - 20.40";
+                    break;
+
+            }
+            return ret;
+        }
+
+
+
+        @Override
+        protected void onPreExecute() {
+            mProgress.show();
+        }
+
+        @Override
+        protected void onPostExecute(Map<String,Subject[]> output) {
+            super.onPostExecute(output);
+            mProgress.hide();
+            if (output == null || output.size() == 0) {
+                Toast.makeText(getContext(), "Расписание для данной группы пока не доступно", Toast.LENGTH_LONG).show();
+            } else {
+                scheldule=output;
+
+                ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(subjects,count,getContext(),AdminFragment.this::onDragStarted);
+                recyclerView.setAdapter(adapterr);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
+                mItemTouchHelper = new ItemTouchHelper(callback);
+                mItemTouchHelper.attachToRecyclerView(recyclerView);
+
             }
 
         }

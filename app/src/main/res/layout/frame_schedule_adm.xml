@@ -53,6 +53,7 @@
         android:text="Комментарий"
         android:textColor="@color/purple_200"
         android:textStyle="italic"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/handle"
         app:layout_constraintStart_toEndOf="@+id/txtCabAdm"
@@ -60,7 +61,7 @@
 
     <ImageView
         android:id="@+id/handle"
-        android:layout_width="?listPreferredItemHeight"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical|right"
         android:layout_marginStart="4dp"
