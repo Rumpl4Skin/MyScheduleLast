@@ -49,7 +49,9 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
         for(int i=0;i<mItems.size();i++)
             subjects[i]=new Subject(mItems.get(i));
     }
-
+public Subject[] getSubjects(){
+        return this.subjects;
+}
     @Override
     public void onItemDismiss(int position) {
         mItems.remove(position);
@@ -70,6 +72,15 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
             mItems.add(subjects.get(""+count)[i]);
         }
     }*/
+   public ScheduleRecycleListAdapterAdm(ScheduleRecycleListAdapterAdm scheduleRecycleListAdapterAdm) {
+       this.subjects = scheduleRecycleListAdapterAdm.subjects;
+       this.context = scheduleRecycleListAdapterAdm.context;
+       this.count=scheduleRecycleListAdapterAdm.count;
+       this.mDragStartListener = scheduleRecycleListAdapterAdm.mDragStartListener;
+       for(int i=0;i<subjects.length;i++){
+           mItems.add(subjects[i]);
+       }
+   }
     public ScheduleRecycleListAdapterAdm(Subject[] subjects, int count, Context context, OnStartDragListener dragStartListener) {
         this.subjects = subjects;
         this.context = context;
@@ -111,6 +122,51 @@ public class ScheduleRecycleListAdapterAdm extends RecyclerView.Adapter<Recycler
                         MotionEvent.ACTION_DOWN) {
                     mDragStartListener.onStartDrag(holder);
                 }
+                return false;
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+//Получаем вид с файла prompt.xml, который применим для диалогового окна:
+                LayoutInflater li = LayoutInflater.from(context);
+                View promptsView = li.inflate(R.layout.prompt_adm, null);
+
+                //Создаем AlertDialog
+                AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(context);
+
+                //Настраиваем prompt.xml для нашего AlertDialog:
+                mDialogBuilder.setView(promptsView);
+
+                //Настраиваем отображение поля для ввода текста в открытом диалоге:
+                final EditText nameInput = (EditText) promptsView.findViewById(R.id.name_subject);
+                final EditText cabInput = (EditText) promptsView.findViewById(R.id.cab);
+                //Настраиваем сообщение в диалоговом окне:
+                mDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("Добавить",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        //Вводим текст и отображаем в строке ввода на основном экране:
+                                        holder.getTxtSubject().setText(nameInput.getText());
+                                        holder.getTxtCab().setText(cabInput.getText());
+                                        SharedPreferences  sPref = context.getSharedPreferences("Comments", MODE_PRIVATE);
+                                        SharedPreferences  sPrefid = context.getSharedPreferences("MainActivity",MODE_PRIVATE);
+                                    }
+                                })
+                        .setNegativeButton("Отмена",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                //Создаем AlertDialog:
+                AlertDialog alertDialog = mDialogBuilder.create();
+
+                //и отображаем его:
+                alertDialog.show();
                 return false;
             }
         });

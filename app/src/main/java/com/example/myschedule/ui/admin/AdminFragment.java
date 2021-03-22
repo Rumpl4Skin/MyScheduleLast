@@ -1775,9 +1775,14 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         private Map<String,Subject[]> getDataFromApi(String spreadsheetId, String table, String day) throws IOException {
 
 
+           // recyclerView.get
             for(int i=0;i<10;i++) {//заполнение всех дней
                 List<ValueRange> appendBody = new ArrayList<>();
+                /*ScheduleRecycleListAdapterAdm adapterr =new ScheduleRecycleListAdapterAdm((ScheduleRecycleListAdapterAdm) recyclerView.getAdapter());
+                schedules.remove(i);
+                schedules.put(i,adapterr.getSubjects());*/
                 for(int j=0;j<schedules.get(0).length;j++){//заполнение конкретноого дня
+
                 ValueRange one = new ValueRange()
                         .setValues(Arrays.asList(
                                 Arrays.asList(schedules.get(i)[j].getSubjectName(),schedules.get(i)[j].getCab())
