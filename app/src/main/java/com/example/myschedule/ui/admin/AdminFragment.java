@@ -68,6 +68,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.AppendValuesResponse;
 import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
 import com.google.api.services.sheets.v4.model.BatchUpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
@@ -77,6 +78,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,7 +119,7 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
     Map<Integer, Subject[]> schedules = new HashMap<Integer, Subject[]>();
     Map<Integer, String> tabs = new HashMap<Integer, String>();
 
-    private static final String[] SCOPES = { SheetsScopes.SPREADSHEETS_READONLY };
+    private static final String[] SCOPES = { SheetsScopes.SPREADSHEETS };
     String[] days={"Понедельник","Вторник","Среда","Четверг","Пятница","Понедельник","Вторник","Среда","Четверг","Пятница"};
 
     private HomeFragment.OnFragmentSendDataListener fragmentSendDataListener;
@@ -768,11 +770,9 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
                         btnDel.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                mDb.delete(TABLE_DISC,
-                                        ID_DISC+" = ?",
-                                        new String[] {edtIdUser.getText().toString()});
-                                Toast.makeText(getContext(), "Запись удалена", Toast.LENGTH_SHORT).show();
-                                updateSubjectUI();
+
+                                Toast.makeText(getContext(), "Для удаления смахните предмет влево или вправо", Toast.LENGTH_SHORT).show();
+
                                 count--;
                             }
                         });
@@ -788,50 +788,20 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
                                     Toast.makeText(getActivity(), "No network connection available.", Toast.LENGTH_LONG).show();
                                 } else {
 
-                                    new AdminFragment.MakeRequestTask(mCredential).execute();
+                                    new AdminFragment.MakeRequestTaskUpd(mCredential).execute();
                                 }
 
                                 Toast.makeText(getContext(), "Запись отредактирована!", Toast.LENGTH_SHORT).show();
-                                updateSubjectUI();
+                                //updateSubjectUI();
                             }
                         });
                         btnAdd.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                ContentValues newValues = new ContentValues();
-                                if(!is_edit){
-                                    edtIdUser.setText("");
-                                    edtFio.setText("");
-                                    edtMail.setText("");
-                                    edtIdGroup.setText("");
-                                    is_edit=true;
-                                    Toast.makeText(getContext(), "Введите данные для добавления надписи", Toast.LENGTH_SHORT).show();
-                                }
 
-                                if((edtFio.getText().toString().equals(""))
-                                        ||edtMail.getText().toString().equals(""))
-                                    Toast.makeText(getContext(), "Не все поля заполнены ", Toast.LENGTH_LONG).show();
-                                else {
-                                    newValues.put(DISC_NAME, edtFio.getText().toString());
-                                    newValues.put(DISC_LAB, edtMail.getText().toString());
-                                    newValues.put(DISC_PRACT, edtIdGroup.getText().toString());
-// Добавление в бд
-                                    mDb.insert(TABLE_DISC, null, newValues);
-                                    count++;
-                                    Toast.makeText(getContext(), "Запись добавлена!", Toast.LENGTH_SHORT).show();
-                                    updateSubjectUI();
-                                    is_edit=false;
-                                }
                             }
                         });
                         getResultsFromApi();
-                        recyclerView.setHasFixedSize(true);
-                       /* ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(subjects,count,getContext(),AdminFragment.this::onDragStarted);
-                        recyclerView.setAdapter(adapterr);
-                        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
-                        mItemTouchHelper = new ItemTouchHelper(callback);
-                        mItemTouchHelper.attachToRecyclerView(recyclerView);*/
                         break;
                 }
 
@@ -1297,6 +1267,25 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
             case "Thu": Day= THU_R; break;
             case "Пятница": Day= FRI_R;break;
             case "Fri": Day= FRI_R; break;
+
+        }
+        return Day;
+    }
+    public String getDayRangeSubj(String day, int count){
+
+        String Day="";
+        switch (day){
+
+            case "Понедельник": Day= "C"+count+":"+"D"+count; break;
+            case "Mon": Day=  "C"+count+":"+"D"+count; break;
+            case "Вторник": Day= "E"+count+":"+"F"+count;break;
+            case "Tue": Day= "E"+count+":"+"F"+count; break;
+            case "Среда": Day= "G"+count+":"+"H"+count;break;
+            case "Wed": Day= "G"+count+":"+"H"+count; break;
+            case "Четверг": Day= "I"+count+":"+"J"+count;break;
+            case "Thu": Day= "I"+count+":"+"J"+count; break;
+            case "Пятница": Day= "K"+count+":"+"L"+count;break;
+            case "Fri": Day= "K"+count+":"+"L"+count; break;
 
         }
         return Day;
@@ -1784,46 +1773,33 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
          * @throws IOException
          */
         private Map<String,Subject[]> getDataFromApi(String spreadsheetId, String table, String day) throws IOException {
-            //spreadsheetId = "1XcATglqKX3IomyzjEaFv4h65B6z0wSNyIkl3Ld4omz0";
-            Map<String, Subject[]> schedule = new HashMap<String, Subject[]>();
-            List<List<Object>> values = Arrays.asList(
-                    Arrays.asList(
-                            // Cell values ...
-                    )
-                    // Additional rows ...
-            );
-            // [START_EXCLUDE silent]
-        /*    values = _values;
-            // [END_EXCLUDE]
-            List<ValueRange> data = new ArrayList<ValueRange>();
-            data.add(new ValueRange()
-                    .setRange(range)
-                    .setValues(values));
-            // TODO: Assign values to desired fields of `requestBody`:
-            BatchUpdateValuesRequest requestBody = new BatchUpdateValuesRequest();
-            requestBody.setValueInputOption(valueInputOption);
-            requestBody.setData(data);
 
 
-            Sheets.Spreadsheets.Values.BatchUpdate request =
-                    this.mService.spreadsheets().values().batchUpdate(spreadsheetId, requestBody);
-
-            BatchUpdateValuesResponse response = request.execute();
-
-            if (values != null) {
-                for (int i = 0; i < values.size(); i++) {
-
-                    if (values.get(i).size() == 1){
-                        change=values.get(i).get(0).toString();
-                    }
-                    else if(values.get(i).size() == 0)
-                        change="";
+            for(int i=0;i<10;i++) {//заполнение всех дней
+                List<ValueRange> appendBody = new ArrayList<>();
+                for(int j=0;j<schedules.get(0).length;j++){//заполнение конкретноого дня
+                ValueRange one = new ValueRange()
+                        .setValues(Arrays.asList(
+                                Arrays.asList(schedules.get(i)[j].getSubjectName(),schedules.get(i)[j].getCab())
+                        ));
+                if(i<=5)
+                    one.setRange(TABLE_NAME_CH +"!"+ getDayRangeSubj(days[i],j+2));
+                else
+                    one.setRange( TABLE_NAME_ZN+"!"+ getDayRangeSubj(days[i],j+2));
+                appendBody.add(one);
+                BatchUpdateValuesRequest requestBody = new BatchUpdateValuesRequest()
+                            .setValueInputOption("USER_ENTERED")
+                            .setData(appendBody);
+                    Sheets.Spreadsheets.Values.BatchUpdate request =
+                            mService.spreadsheets().values().batchUpdate(spreadsheetId, requestBody);
+                    BatchUpdateValuesResponse response = request.execute();
                 }
+
             }
 
-            int count=getCountDay(getNameDay(getCurrentDay()));*/
+           // int count=getCountDay(getNameDay(getCurrentDay()));
             for(int k=/*count*/0;k</*count+*/10;k++) {
-               /* if(k<4){
+                /*if(k<4){
                     range = TABLE_NAME_CH + "!" + getDayRange(days[k]);
                 }
                 else {
@@ -1851,12 +1827,12 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                 subjects=new Subject[results.size()];
                 for (int i = 0; i < fin_res.length; i++){
                     fin_res[i] = results.get(i);
-                    subjects[i]=fin_res[i];*/
-                }
-               /* schedules.put(k,fin_res);
-                schedule.put(days[k],fin_res);
-            }*/
-            return schedule;
+                    subjects[i]=fin_res[i];
+                }*/
+                //schedules.put(k,fin_res);
+                //schedule.put(days[k],fin_res);
+            }
+            return null;
         }
         public String Time(int i){
             String ret="";
@@ -1919,9 +1895,9 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
         protected void onPostExecute(Map<String,Subject[]> output) {
             super.onPostExecute(output);
             mProgress.hide();
-            if (output == null || output.size() == 0) {
+           /* if (output == null || output.size() == 0) {
                 Toast.makeText(getContext(), "Расписание для данной группы пока не доступно", Toast.LENGTH_LONG).show();
-            } else {
+            }/* else {
                 scheldule=output;
 
                 ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(subjects,count,getContext(),AdminFragment.this::onDragStarted);
@@ -1931,7 +1907,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                 mItemTouchHelper = new ItemTouchHelper(callback);
                 mItemTouchHelper.attachToRecyclerView(recyclerView);
 
-            }
+            }*/
 
         }
 
