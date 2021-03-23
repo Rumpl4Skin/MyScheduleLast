@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
@@ -33,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -108,17 +110,65 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String TABLE_NAME_CH = "Числитель";
     private static final String TABLE_NAME_ZN = "Знаменатель";
-    private static final String MON_R = "C2:D11";
-    private static final String TUE_R = "E2:F11";
-    private static final String WED_R = "G2:H11";
-    private static final String THU_R = "I2:J11";
-    private static final String FRI_R = "K2:L11";
+    private static final String MON_R = "C2:D12";
+    private static final String TUE_R = "E2:F12";
+    private static final String WED_R = "G2:H12";
+    private static final String THU_R = "I2:J12";
+    private static final String FRI_R = "K2:L12";
     boolean isBeforeFri=false,tabsChange=false;
     int week=0;
     String change="";
     Map<Integer, Subject[]> schedules = new HashMap<Integer, Subject[]>();
     Map<Integer, String> tabs = new HashMap<Integer, String>();
+    public String Time(int i){
+        String ret="";
+        switch (i){
+            case 0:
+                ret= "8.00-8.45";
+                break;
+            case 1:
+                ret= "8.55-9.40";
+                break;
+            case 2:
+                ret= "9.50-10.35";
+                break;
+            case 3:
+                ret= "10.45-11.30";
+                break;
+            case 4:
+                ret= "11.40-12.25";
+                break;
+            case 5:
+                ret= "12.35-13.20";
+                break;
+            case 6:
+                ret= "13.30-14.15";
+                break;
+            case 7:
+                ret= "14.25-15.10";
+                break;
+            case 8:
+                ret= "15.20-16.05";
+                break;
+            case 9:
+                ret= "16.15-17.00";
+                break;
+            case 10:
+                ret= "17.10-17.55";
+                break;
+            case 11:
+                ret= "18.05 - 18.50";
+                break;
+            case 12:
+                ret= "19.00 - 19.45";
+                break;
+            case 13:
+                ret= "19.55 - 20.40";
+                break;
 
+        }
+        return ret;
+    }
     private static final String[] SCOPES = { SheetsScopes.SPREADSHEETS };
     String[] days={"Понедельник","Вторник","Среда","Четверг","Пятница","Понедельник","Вторник","Среда","Четверг","Пятница"};
 
@@ -798,10 +848,57 @@ public class AdminFragment extends Fragment implements EasyPermissions.Permissio
                         btnAdd.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                LayoutInflater li = LayoutInflater.from(getContext());
+                                View promptsView = li.inflate(R.layout.prompt_adm, null);
 
+                                //Создаем AlertDialog
+                                AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(getContext());
+
+                                //Настраиваем prompt.xml для нашего AlertDialog:
+                                mDialogBuilder.setView(promptsView);
+
+                                //Настраиваем отображение поля для ввода текста в открытом диалоге:
+                                final EditText nameInput = (EditText) promptsView.findViewById(R.id.name_subject);
+                                final EditText cabInput = (EditText) promptsView.findViewById(R.id.cab);
+                                //Настраиваем сообщение в диалоговом окне:
+                                mDialogBuilder
+                                        .setCancelable(false)
+                                        .setPositiveButton("Добавить",
+                                                new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog,int id) {
+                                                        //Вводим текст и отображаем в строке ввода на основном экране:
+                                                        Subject[] now= new Subject[schedules.get(count).length+1];
+                                                        for(int i=0;i<now.length;i++){
+                                                            if(i==now.length-1){
+                                                                now[i]=new Subject(Time(i),nameInput.getText().toString(),"",cabInput.getText().toString());
+                                                            }
+                                                            else
+                                                            now[i]= schedules.get(count)[i];
+                                                        }
+                                                        schedules.put(count,now);
+                                                        ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(schedules.get(count),count,getContext(),AdminFragment.this::onDragStarted);
+                                                        recyclerView.setAdapter(adapterr);
+                                                        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                                                        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
+                                                        mItemTouchHelper = new ItemTouchHelper(callback);
+                                                        mItemTouchHelper.attachToRecyclerView(recyclerView);
+
+                                                    }
+                                                })
+                                        .setNegativeButton("Отмена",
+                                                new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog,int id) {
+                                                        dialog.cancel();
+                                                    }
+                                                });
+                                //Создаем AlertDialog:
+                                AlertDialog alertDialog = mDialogBuilder.create();
+
+                                //и отображаем его:
+                                alertDialog.show();
                             }
                         });
-                        getResultsFromApi();
+                       // getResultsFromApi();
                         break;
                 }
 
@@ -1565,7 +1662,6 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
             Map<String, Subject[]> schedule = new HashMap<String, Subject[]>();
             String range="B14";
 
-
             ArrayList<Subject> results = new ArrayList<Subject>();
 
             ValueRange response = this.mService.spreadsheets().values()
@@ -1690,9 +1786,9 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                 ScheduleRecycleListAdapterAdm adapterr = new ScheduleRecycleListAdapterAdm(subjects,count,getContext(),AdminFragment.this::onDragStarted);
                 recyclerView.setAdapter(adapterr);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
+                /*ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapterr);
                 mItemTouchHelper = new ItemTouchHelper(callback);
-                mItemTouchHelper.attachToRecyclerView(recyclerView);
+                mItemTouchHelper.attachToRecyclerView(recyclerView);*/
 
             }
 
@@ -1776,21 +1872,27 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
 
 
            // recyclerView.get
-            for(int i=0;i<10;i++) {//заполнение всех дней
-                List<ValueRange> appendBody = new ArrayList<>();
+            /*for(int i=0;i<10;i++) {//заполнение всех дней
+
                 /*ScheduleRecycleListAdapterAdm adapterr =new ScheduleRecycleListAdapterAdm((ScheduleRecycleListAdapterAdm) recyclerView.getAdapter());
                 schedules.remove(i);
                 schedules.put(i,adapterr.getSubjects());*/
-                for(int j=0;j<schedules.get(0).length;j++){//заполнение конкретноого дня
+                //if(i==count){
+                List<ValueRange> appendBody = new ArrayList<>();
+                ScheduleRecycleListAdapterAdm adapterAdm=(ScheduleRecycleListAdapterAdm) recyclerView.getAdapter();
+                schedules.remove(count);
+                schedules.put(count,adapterAdm.getSubjects());
+               // }
+                for(int j=0;j<schedules.get(count).length;j++){//заполнение конкретноого дня
 
                 ValueRange one = new ValueRange()
                         .setValues(Arrays.asList(
-                                Arrays.asList(schedules.get(i)[j].getSubjectName(),schedules.get(i)[j].getCab())
+                                Arrays.asList(schedules.get(count)[j].getSubjectName(),schedules.get(count)[j].getCab())
                         ));
-                if(i<=5)
-                    one.setRange(TABLE_NAME_CH +"!"+ getDayRangeSubj(days[i],j+2));
+                if(count<=5)
+                    one.setRange(TABLE_NAME_CH +"!"+ getDayRangeSubj(days[count],j+2));
                 else
-                    one.setRange( TABLE_NAME_ZN+"!"+ getDayRangeSubj(days[i],j+2));
+                    one.setRange( TABLE_NAME_ZN+"!"+ getDayRangeSubj(days[count],j+2));
                 appendBody.add(one);
                 BatchUpdateValuesRequest requestBody = new BatchUpdateValuesRequest()
                             .setValueInputOption("USER_ENTERED")
@@ -1800,7 +1902,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                     BatchUpdateValuesResponse response = request.execute();
                 }
 
-            }
+           // }
 
            // int count=getCountDay(getNameDay(getCurrentDay()));
             for(int k=/*count*/0;k</*count+*/10;k++) {

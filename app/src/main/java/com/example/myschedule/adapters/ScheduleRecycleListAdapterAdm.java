@@ -91,6 +91,10 @@ public Subject[] getSubjects(){
         }
     }
 
+    public List<Subject> getmItems() {
+        return mItems;
+    }
+
     @Override
     public int getItemViewType(final int position) {
         return R.layout.frame_schedule_adm;
