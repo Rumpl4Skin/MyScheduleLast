@@ -155,8 +155,14 @@ public Subject[] getSubjects(){
                                         //Вводим текст и отображаем в строке ввода на основном экране:
                                         holder.getTxtSubject().setText(nameInput.getText());
                                         holder.getTxtCab().setText(cabInput.getText());
-                                        SharedPreferences  sPref = context.getSharedPreferences("Comments", MODE_PRIVATE);
                                         SharedPreferences  sPrefid = context.getSharedPreferences("MainActivity",MODE_PRIVATE);
+                                        SharedPreferences  sPref = context.getSharedPreferences(sPrefid.getString("group",""), MODE_PRIVATE);
+
+                                        SharedPreferences.Editor ed = sPref.edit();
+                                        ed.putInt("pos", position);
+                                        ed.putString("name", nameInput.getText().toString());
+                                        ed.putString("cab", cabInput.getText().toString());
+                                        ed.commit();
                                     }
                                 })
                         .setNegativeButton("Отмена",

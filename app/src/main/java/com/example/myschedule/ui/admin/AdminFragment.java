@@ -1659,6 +1659,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
          */
         private Map<String,Subject[]> getDataFromApi(String spreadsheetId, String table, String day) throws IOException {
             //spreadsheetId = "1XcATglqKX3IomyzjEaFv4h65B6z0wSNyIkl3Ld4omz0";
+            count=0;
             Map<String, Subject[]> schedule = new HashMap<String, Subject[]>();
             String range="B14";
 
@@ -1878,10 +1879,20 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                 schedules.remove(i);
                 schedules.put(i,adapterr.getSubjects());*/
                 //if(i==count){
+            SharedPreferences  sPrefid = getContext().getSharedPreferences("MainActivity",MODE_PRIVATE);
+            SharedPreferences  sPref = getContext().getSharedPreferences(sPrefid.getString("group",""), MODE_PRIVATE);
+
+
+
                 List<ValueRange> appendBody = new ArrayList<>();
                 ScheduleRecycleListAdapterAdm adapterAdm=(ScheduleRecycleListAdapterAdm) recyclerView.getAdapter();
                 schedules.remove(count);
-                schedules.put(count,adapterAdm.getSubjects());
+                Subject[] subjects =adapterAdm.getSubjects();
+                subjects[ sPref.getInt("pos",0)].setSubjectName(sPref.getString("name",""));
+            subjects[ sPref.getInt("pos",0)].setCab(sPref.getString("cab",""));
+                schedules.put(count,subjects);
+            SharedPreferences.Editor ed = sPref.edit();
+            ed.clear();
                // }
                 for(int j=0;j<schedules.get(count).length;j++){//заполнение конкретноого дня
 
@@ -1938,6 +1949,7 @@ btnAdd.setOnClickListener(new View.OnClickListener() {
                 }*/
                 //schedules.put(k,fin_res);
                 //schedule.put(days[k],fin_res);
+                count=0;
             }
             return null;
         }
